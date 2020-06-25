@@ -1,0 +1,5 @@
+# Web storm folder
+/.idea
+
+# NodeJS downloads
+/node_modules

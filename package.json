@@ -1,0 +1,35 @@
+{
+  "name": "version-generate",
+  "version": "1.0.0",
+  "description": "A GitHub action for reading, bumping, generating, formatting applications versions in release pipelines",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "ncc build src/index.js -o build && cp ./action.sh build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HardNorth/github-version-generate.git"
+  },
+  "keywords": [
+    "GitHub",
+    "action",
+    "version",
+    "versions",
+    "generation",
+    "generate",
+    "bump",
+    "prepare"
+  ],
+  "author": "Vadzim Hushchanskou",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/HardNorth/github-version-generate",
+  "dependencies": {
+    "@zeit/ncc": "0.22.3",
+    "@actions/core": "1.2.4"
+  },
+  "bugs": {
+    "url": "https://github.com/HardNorth/github-version-generate/issues"
+  },
+  "devDependencies": {}
+}
