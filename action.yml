@@ -1,0 +1,59 @@
+name: 'Generate version'
+description: |
+  A GitHub action for reading, bumping, generating, formatting applications versions in release pipelines.
+author: 'Vadzim Hushchanskou'
+branding:
+  icon: 'hash'
+  color: 'gray-dark'
+inputs:
+  # Version sources
+  version-source:
+    description: |
+      A source of a CURRENT_VERSION, might be:
+      - file
+      - variable
+    required: true
+    default: 'variable'
+  version:
+    description: 'A version variable for version source'
+    required: false
+  version-file:
+    description: 'A path to a file with which holds a version'
+    required: false
+  version-file-extraction-pattern:
+    description: |
+      A RegEx to extract version from a version-source file. Should either match a full version, or return it as the
+      first group. E.G:
+      - '(?<=version=).+' - pattern match, e.g: 'version=5.0.3-SNAPSHOT' will extract matched string '5.0.3-SNAPSHOT'
+      - '"version":\s*"([^"]+)"' - group match, will extract the first group. e.g: '"version": "1.0.0",' to '1.0.0'
+
+      In case if there are groups in a pattern the first group will be extracted.
+    required: false
+    default: '.+'
+
+  # Version increments
+  increment-major:
+    description: 'Increment major version in result NEXT_VERSION'
+    required: false
+    default: 'false'
+  increment-minor:
+    description: 'Increment minor version in result NEXT_VERSION'
+    required: false
+    default: 'false'
+  increment-patch:
+    description: 'Increment patch version in result NEXT_VERSION'
+    required: false
+    default: 'false'
+  increment-prerelease:
+    description: 'Increment prerelease version in result NEXT_VERSION'
+    required: false
+    default: 'false'
+
+  # Build metadata
+  generate-build-metadata:
+    description: 'Put build metadata (release date, commit sha, etc.) into result RELEASE_VERSION'
+    required: false
+    default: 'false'
+runs:
+  using: 'node12'
+  main: 'build/index.js'
