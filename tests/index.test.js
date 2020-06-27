@@ -22,5 +22,10 @@ test("Test getFileVersion function throws exception on not existing file", async
 // Version parse
 test("Test simple version parse", () => {
     const result = index.parseVersion("5.0.3-SNAPSHOT");
-    expect(result).toBe("5.0.3-SNAPSHOT");
+    expect(result.raw).toBe("5.0.3-SNAPSHOT");
+    expect(result.major).toBe(5);
+    expect(result.minor).toBe(0);
+    expect(result.patch).toBe(3);
+    expect(result.prerelease).toBe("SNAPSHOT");
+    expect(result.buildmetadata).toBeNull();
 });
