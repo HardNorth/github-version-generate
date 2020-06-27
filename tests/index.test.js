@@ -1,3 +1,5 @@
+const each = require("jest-each").default;
+
 const index = require("../src/index");
 
 // Version file read
@@ -19,13 +21,21 @@ test("Test getFileVersion function throws exception on not existing file", async
     });
 });
 
-// Version parse
-test("Test simple version parse", () => {
-    const result = index.parseVersion("5.0.3-SNAPSHOT");
-    expect(result.raw).toBe("5.0.3-SNAPSHOT");
-    expect(result.major).toBe(5);
-    expect(result.minor).toBe(0);
-    expect(result.patch).toBe(3);
-    expect(result.prerelease).toBe("SNAPSHOT");
-    expect(result.buildmetadata).toBeNull();
+
+describe("Test version parse successful", () => {
+    each([
+        ["5.0.3-SNAPSHOT", 5, 0, 3, "SNAPSHOT", null],
+        ["5.0.0-BETA-16-SNAPSHOT", 5, 0, 0, "BETA-16-SNAPSHOT", null],
+        ["5.0.0-BETA-16-SNAPSHOT+build.2017-03-15.3ecfad", 5, 0, 0, "BETA-16-SNAPSHOT", "build.2017-03-15.3ecfad"],
+        ["5.0.0-TESTNG6-BETA-16-SNAPSHOT+build.2017-03-15.3ecfad", 5, 0, 0, "TESTNG6-BETA-16-SNAPSHOT", "build.2017-03-15.3ecfad"]
+    ]).it("When versions is %s", (version, major, minor, patch, prerelease, buildmetadata) => {
+        const result = index.parseVersion(version);
+        expect(result.raw).toBe(version);
+        expect(result.major).toBe(major);
+        expect(result.minor).toBe(minor);
+        expect(result.patch).toBe(patch);
+        expect(result.prerelease).toBe(prerelease);
+        expect(result.buildmetadata).toBe(buildmetadata);
+    })
 });
+
