@@ -25,16 +25,18 @@
   "license": "Apache-2.0",
   "homepage": "https://github.com/HardNorth/github-version-generate",
   "dependencies": {
-    "@zeit/ncc": "0.22.3",
     "@actions/core": "1.2.4",
-    "@actions/github": "3.0.0",
     "@actions/exec": "1.0.4",
+    "@actions/github": "3.0.0",
+    "@zeit/ncc": "0.22.3",
     "xregexp": "4.3.0"
   },
   "bugs": {
     "url": "https://github.com/HardNorth/github-version-generate/issues"
   },
   "devDependencies": {
-    "jest": "26.1.0"
+    "jest": "26.1.0",
+    "jest-each": "26.1.0",
+    "@jest/globals": "26.1.0"
   }
 }
