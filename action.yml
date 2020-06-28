@@ -31,29 +31,43 @@ inputs:
     required: false
     default: '.+'
 
+  # Release version
+  release-version-cut-snapshot:
+    description: 'Remove "SNAPSHOT" suffix from source version'
+    required: false
+    default: 'true'
+  release-version-cut-build-metadata:
+    description: 'Remove build metadata suffix from source version'
+    required: false
+    default: 'true'
+  # Build metadata
+  release-version-generate-build-metadata:
+    description: 'Put build metadata (release date, commit sha, etc.) into result RELEASE_VERSION'
+    required: false
+    default: 'false'
+  release-version-build-metadata-pattern:
+    description: 'Format pattern for build metadata'
+    required: false
+    default: 'build.{date}.{hash}'
+
   # Version increments
-  increment-major:
+  next-version-increment-major:
     description: 'Increment major version in result NEXT_VERSION'
     required: false
     default: 'false'
-  increment-minor:
+  next-version-increment-minor:
     description: 'Increment minor version in result NEXT_VERSION'
     required: false
     default: 'false'
-  increment-patch:
+  next-version-increment-patch:
     description: 'Increment patch version in result NEXT_VERSION'
     required: false
     default: 'false'
-  increment-prerelease:
+  next-version-increment-prerelease:
     description: 'Increment prerelease version in result NEXT_VERSION'
     required: false
     default: 'false'
 
-  # Build metadata
-  generate-build-metadata:
-    description: 'Put build metadata (release date, commit sha, etc.) into result RELEASE_VERSION'
-    required: false
-    default: 'false'
 runs:
   using: 'node12'
   main: 'build/index.js'
