@@ -16,15 +16,15 @@ function Version(parseResultArray) {
     this.major = parseInt(parseResultArray.major);
     this.minor = parseInt(parseResultArray.minor);
     this.patch = parseInt(parseResultArray.patch);
-    if (parseResultArray.prerelease) {
+    if (typeof parseResultArray.prerelease !== 'undefined') {
         this.prerelease = parseResultArray.prerelease;
     } else {
         this.prerelease = null;
     }
-    if (parseResultArray.buildmetadata) {
-        this.buildmetadata = parseResultArray.buildmetadata;
+    if (typeof parseResultArray.buildmetadata !== 'undefined') {
+        this.buildMetadata = parseResultArray.buildmetadata;
     } else {
-        this.buildmetadata = null;
+        this.buildMetadata = null;
     }
 }
 
@@ -34,8 +34,8 @@ Version.prototype.toString = function () {
     if (this.prerelease) {
         result.push("-", this.prerelease);
     }
-    if (this.buildmetadata) {
-        result.push("+", this.buildmetadata);
+    if (this.buildMetadata) {
+        result.push("+", this.buildMetadata);
     }
     return result.join("");
 };
