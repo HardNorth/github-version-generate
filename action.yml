@@ -46,11 +46,20 @@ inputs:
     required: false
     default: 'false'
   release-version-build-metadata-pattern:
-    description: 'Format pattern for build metadata'
+    description: |
+      Format pattern for build metadata. EG: "build.{date[YYYY-MM-dd]}.{hash[0, 6]}". Supported variables:
+      - date[date_format]: a current date in UTC or time set in 'release-version-build-metadata-datetime' variable.
+      Supports formationg included in square braces ([]). The date format will be applied by "Moment.js"
+      library: https://momentjs.com/
+      - hash
     required: false
     default: 'build.{date}.{hash}'
+  release-version-build-metadata-datetime:
+    description: 'A time stamp in ISO format to put into a build metadata string, by default the action uses current time in UTC timezone.'
+    required: false
 
-  # Version increments
+
+  # Next version increments
   next-version-increment-major:
     description: 'Increment major version in result NEXT_VERSION'
     required: false
@@ -67,6 +76,20 @@ inputs:
     description: 'Increment prerelease version in result NEXT_VERSION'
     required: false
     default: 'false'
+
+  # Next version additional params
+  next-version-put-build-metadata:
+    description: 'Put build metadata (release date, commit sha, etc.) into result NEXT_VERSION. Will be the same as for release.'
+    required: false
+    default: 'false'
+
+outputs:
+  CURRENT_VERSION:
+    description: 'A version grabbed from a variable or a file without any changes'
+  RELEASE_VERSION:
+    description: 'A version prepared for release tagging, usually with removed "SNAPSHOT" suffix and optionally with a build metadata'
+  NEXT_VERSION:
+    description: 'A version prepared for pushing into a repository instead of "CURRENT_VERSION" after release, usually incremented by 1'
 
 runs:
   using: 'node12'
