@@ -57,3 +57,79 @@ describe("Test toString", () => {
         });
     }
 );
+
+// Properties creation
+
+const MINIMAL_CORRECT_INPUTS = {
+    "INPUT_version-source": "variable",
+    "INPUT_version": "1.0.0",
+    "INPUT_next-version-put-build-metadata": "false",
+    "INPUT_release-version-cut-snapshot": "true",
+    "INPUT_release-version-cut-build-metadata": "true",
+    "INPUT_release-version-generate-build-metadata": "false",
+    "INPUT_next-version-increment-major": "false",
+    "INPUT_next-version-increment-minor": "false",
+    "INPUT_next-version-increment-patch": "false",
+    "INPUT_next-version-increment-prerelease": "false",
+    "INPUT_release-version-build-metadata-pattern": "build.{date}.{hash}"
+};
+
+test("Test correct properties input, variable version source", () => {
+    for (const key in MINIMAL_CORRECT_INPUTS) {
+        process.env[key] = MINIMAL_CORRECT_INPUTS[key];
+    }
+    expect(new index.Properties()).toMatchObject({version: "1.0.0"});
+});
+
+test("Test properties fail if version-source is 'file' and no file specified", () => {
+    const inputs = {MINIMAL_CORRECT_INPUTS, "INPUT_version-source": "file"};
+    for (const key in inputs) {
+        process.env[key] = inputs[key];
+    }
+
+    const p = () => new index.Properties();
+    expect(p).toThrowError("Input required and not supplied: version-file");
+});
+
+test("Test properties fail if version-source is 'file' and no 'extraction-pattern' specified", () => {
+    const inputs = {
+        MINIMAL_CORRECT_INPUTS,
+        "INPUT_version-source": "file",
+        "INPUT_version-file": "tests/resources/version.txt"
+    };
+
+    for (const key in inputs) {
+        process.env[key] = inputs[key];
+    }
+
+    const p = () => new index.Properties();
+    expect(p).toThrowError("Input required and not supplied: version-file-extraction-pattern");
+});
+
+test("Test properties fail if version-source is 'variable' and no 'version' specified", () => {
+    const inputs = {
+        MINIMAL_CORRECT_INPUTS,
+        "INPUT_version": ""
+    };
+
+    for (const key in inputs) {
+        process.env[key] = inputs[key];
+    }
+
+    const p = () => new index.Properties();
+    expect(p).toThrowError("Input required and not supplied: version");
+});
+
+// Metadata generation
+
+const METADATA_TEST_CASES = [
+    "build.{date}.{hash}",
+    "build.{date[YYYY-MM-dd]}.{hash}",
+    "build.{date[YYYY-MM-dd]}.{hash[0,6]}",
+    "build.{date[ YYYY-MM-dd ]}.{hash[ 0, 6 ]}",
+    "{date}-{hash}-something",
+    "build-{date}-{hash}",
+    "build.{date}.hash.{hash}",
+    "{date}.{hash[0,6]}",
+    "build.2342234."
+];

@@ -29,6 +29,7 @@
     "@actions/exec": "1.0.4",
     "@actions/github": "3.0.0",
     "@zeit/ncc": "0.22.3",
+    "escape-html": "1.0.3",
     "moment": "2.27.0",
     "xregexp": "4.3.0"
   },
