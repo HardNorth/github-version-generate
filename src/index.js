@@ -3,7 +3,6 @@
 const core = require("@actions/core");
 const github = require("@actions/github");
 const context = github.context;
-const exec = require("@actions/exec");
 const XRegExp = require("xregexp");
 const escape = require("escape-html");
 const moment = require("moment");
@@ -18,7 +17,11 @@ const SNAPSHOT = "SNAPSHOT";
 const SNAPSHOT_SUFFIX = PRERELEASE_SEPARATOR + SNAPSHOT;
 
 const METADATA_VALIDATION_PATTERN = XRegExp("^(?:[0-9a-zA-Z-.]*{(?:date|hash)(?:\\[[^\\]]*\\])?})*[0-9a-zA-Z-.]*$");
-const METADATA_VARIABLE_EXTRACTION = XRegExp("{(date|hash)(\\[[^\\]]*\\])?}");
+const METADATA_VARIABLE_EXTRACTION = XRegExp("{(date|hash)(?:\\[([^\\]]*)\\])?}");
+const METADATA_DEFAULT_VARIABLE_FORMAT_PATTERNS = {
+    date: "YYYY-MM-DD",
+    hash: "0, 8"
+};
 
 
 function Properties() {
@@ -60,9 +63,9 @@ function Version(parseResultArray) {
         this.prerelease = null;
     }
     if (typeof parseResultArray.buildmetadata !== "undefined") {
-        this.buildMetadata = parseResultArray.buildmetadata;
+        this.buildmetadata = parseResultArray.buildmetadata;
     } else {
-        this.buildMetadata = null;
+        this.buildmetadata = null;
     }
 }
 
@@ -72,8 +75,8 @@ Version.prototype.toString = function () {
     if (this.prerelease) {
         result.push("-", this.prerelease);
     }
-    if (this.buildMetadata) {
-        result.push("+", this.buildMetadata);
+    if (this.buildmetadata) {
+        result.push("+", this.buildmetadata);
     }
     return result.join("");
 };
@@ -117,11 +120,28 @@ function generateMetadata(pattern, model) {
             "or ensure it doesn't contain incorrect symbols, see also: https://semver.org/");
     }
 
-    const variables = XRegExp.exec(pattern, METADATA_VARIABLE_EXTRACTION);
-    if (!variables) {
-        return pattern;
+    let metadata = pattern;
+    let variable;
+    while (variable = XRegExp.exec(metadata, METADATA_VARIABLE_EXTRACTION)) {
+        const word = variable[1];
+        let format = variable[2];
+        if (!format) {
+            format = METADATA_DEFAULT_VARIABLE_FORMAT_PATTERNS[word];
+        }
+        if (!format) {
+            throw new Error("Unable to process metadata pattern: " + escape(pattern) + "; unknown word: " +
+                escape(word));
+        }
+        let result;
+        if (word === "date") {
+            result = moment(model["date"]).format(format.trim());
+        } else {
+            const formatValues = format.split(/\s*,\s*/);
+            result = model["hash"].substring(formatValues[0].trimLeft(), formatValues[1].trimRight());
+        }
+        metadata = metadata.substring(0, variable["index"]) + result + metadata.substring(variable["index"] + variable[0].length);
     }
-    // TODO: finish
+    return metadata;
 }
 
 function generateReleaseVersion(currentVersion, properties) {
@@ -138,17 +158,21 @@ function generateReleaseVersion(currentVersion, properties) {
     }
 
     if (properties.releaseCutMetadata) {
-        releaseVersion.buildMetadata = null;
+        releaseVersion.buildmetadata = null;
     }
 
     if (properties.releaseGenerateMetadata) {
         const model = {
-            date: properties.releaseMetadataTime ? new Date(properties.releaseMetadataTime) : Date.now(),
+            date: properties.releaseMetadataTime ? properties.releaseMetadataTime : Date.now(),
             hash: context.sha
         };
-        releaseVersion.buildMetadata = generateMetadata(properties.releaseMetadataPattern, model);
+        releaseVersion.buildmetadata = generateMetadata(properties.releaseMetadataPattern, model);
     }
     return releaseVersion;
+}
+
+function generateNextVersion(currentVersion, releaseVersion, properties) {
+    // TODO: finish this
 }
 
 async function run() {
@@ -177,7 +201,19 @@ async function run() {
     core.exportVariable("CURRENT_VERSION", currentVersionStr);
     core.setOutput("CURRENT_VERSION", currentVersionStr);
 
+    // Parse and set 'RELEASE_VERSION' outputs
     const releaseVersion = generateReleaseVersion(parsedVersion, properties);
+    const releaseVersionStr = releaseVersion.toString();
+    core.info("Got release version: " + releaseVersionStr);
+    core.exportVariable("RELEASE_VERSION", releaseVersionStr);
+    core.setOutput("RELEASE_VERSION", releaseVersionStr);
+
+    // Parse and set 'NEXT_VERSION' outputs
+    const nextVersion = generateReleaseVersion(parsedVersion, releaseVersion, properties);
+    const nextVersionStr = nextVersion.toString();
+    core.info("Got next version: " + nextVersionStr);
+    core.exportVariable("NEXT_VERSION", nextVersionStr);
+    core.setOutput("NEXT_VERSION", nextVersionStr);
 }
 
 run().catch(error => {
@@ -189,5 +225,6 @@ module.exports = {
     "Version": Version,
     "getFileVersion": getFileVersion,
     "parseVersion": parseVersion,
-    "generateReleaseVersion": generateReleaseVersion
+    "generateReleaseVersion": generateReleaseVersion,
+    "generateMetadata": generateMetadata
 };
