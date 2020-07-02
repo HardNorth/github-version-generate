@@ -7,4 +7,3 @@ Outputs three environment variables:
 
 The action is used so-called "[Semantic version](https://semver.org/)" system, please check out the 
 specification first to avoid misunderstanding and misuses.
-
