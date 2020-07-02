@@ -1,0 +1,17 @@
+name: CI Build
+
+on:
+  push:
+    branches:
+    - '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Test with Jest
+      run: npm run test
+    - name: Build with ncc
+      run: npm run build
