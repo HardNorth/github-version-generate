@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --notify",
-    "build": "ncc build src/index.js -o build && cp ./action.sh build"
+    "build": "ncc build src/index.js -o build"
   },
   "repository": {
     "type": "git",
