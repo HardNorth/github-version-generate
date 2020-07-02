@@ -3,7 +3,7 @@
 ## [Unreleased]
 
 ## [1.0.1]
-## Fixed
+### Fixed
 - Version reset if a version of a greater value incremented
 
 ## [1.0.0]
