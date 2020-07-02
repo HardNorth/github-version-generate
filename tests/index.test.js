@@ -65,7 +65,6 @@ describe("Test toString", () => {
 const MINIMAL_CORRECT_INPUTS = {
     "INPUT_version-source": "variable",
     "INPUT_version": "1.0.0",
-    "INPUT_next-version-put-build-metadata": "false",
     "INPUT_release-version-cut-snapshot": "true",
     "INPUT_release-version-cut-build-metadata": "true",
     "INPUT_release-version-generate-build-metadata": "false",
@@ -73,7 +72,9 @@ const MINIMAL_CORRECT_INPUTS = {
     "INPUT_next-version-increment-minor": "false",
     "INPUT_next-version-increment-patch": "false",
     "INPUT_next-version-increment-prerelease": "false",
-    "INPUT_release-version-build-metadata-pattern": "build.{date}.{hash}"
+    "INPUT_release-version-build-metadata-pattern": "build.{date}.{hash}",
+    "INPUT_next-version-cut-build-metadata": "true",
+    "INPUT_next-version-put-build-metadata": "false"
 };
 
 test("Test correct properties input, variable version source", () => {
@@ -216,6 +217,69 @@ describe("Test release version generation with different properties", () => {
         }
 
         const result = index.generateReleaseVersion(currentVersion, new index.Properties()).toString();
+        expect(result).toBe(expected);
+    });
+});
+
+// NEXT_VERSION generation
+
+PRERELEASE_INCREMENT_TEST_CASES = [
+    [new index.Version(CURRENT_VERSION), "1.2.3-BETA-8-SNAPSHOT+build.2017-02-03.3e1f4d"],
+    [new index.Version(INCORRECT_SNAPSHOT_VERSION), "1.2.3-BETA-SNAPSHOT-7+build.2017-02-03.3e1f4d"],
+    [new index.Version({
+        ...CURRENT_VERSION,
+        prerelease: "TESTNG7-BETA-7-SNAPSHOT"
+    }), "1.2.3-TESTNG7-BETA-8-SNAPSHOT+build.2017-02-03.3e1f4d"],
+    [new index.Version({...CURRENT_VERSION, prerelease: "TESTNG6-RC1"}), "1.2.3-TESTNG6-RC2+build.2017-02-03.3e1f4d"],
+    [new index.Version({...CURRENT_VERSION, prerelease: "TESTNG6-RC-1"}), "1.2.3-TESTNG6-RC-2+build.2017-02-03.3e1f4d"]
+];
+
+describe("Test prerelease increments", () => {
+    beforeAll(() => {
+        for (const key in MINIMAL_CORRECT_INPUTS) {
+            process.env[key] = MINIMAL_CORRECT_INPUTS[key];
+        }
+    });
+    each(PRERELEASE_INCREMENT_TEST_CASES).it("When version is: '%s'; result should be: '%s'", (input, expected) => {
+        index.incrementPrerelease(input);
+        expect(input.toString()).toBe(expected);
+    });
+});
+
+const RELEASE_VERSION = new index.Version({
+    input: "1.2.3-BETA-7",
+    major: "1",
+    minor: "2",
+    patch: "3",
+    prerelease: "BETA-7",
+    buildmetadata: "build.2017-02-04.5e2079"
+});
+
+const NEXT_VERSION_TEST_CASES = [
+    [{}, CURRENT_VERSION, RELEASE_VERSION, "1.2.3-BETA-8-SNAPSHOT"],
+    [{"INPUT_next-version-put-build-metadata": "true"}, CURRENT_VERSION, RELEASE_VERSION, "1.2.3-BETA-8-SNAPSHOT+build.2017-02-04.5e2079"],
+    [{"INPUT_next-version-increment-patch": "true"}, CURRENT_VERSION, RELEASE_VERSION, "1.2.4-BETA-7-SNAPSHOT"],
+    [{"INPUT_next-version-increment-minor": "true"}, CURRENT_VERSION, RELEASE_VERSION, "1.3.3-BETA-7-SNAPSHOT"],
+    [{"INPUT_next-version-increment-major": "true"}, CURRENT_VERSION, RELEASE_VERSION, "2.2.3-BETA-7-SNAPSHOT"],
+    [{"INPUT_next-version-increment-prerelease": "true"}, new index.Version({
+        ...CURRENT_VERSION,
+        prerelease: "SNAPSHOT"
+    }), RELEASE_VERSION, "1.2.3-SNAPSHOT"],
+    [{
+        "INPUT_next-version-increment-major": "true",
+        "INPUT_next-version-increment-prerelease": "true"
+    }, CURRENT_VERSION, RELEASE_VERSION, "2.2.3-BETA-8-SNAPSHOT"]
+];
+describe("Test next version generation with different properties", () => {
+    each(NEXT_VERSION_TEST_CASES).it("When inputs are '%s'; and current version is: '%s'; and release version is: '%s'; expected is '%s'", (inputs, currentVersion, releaseVersion, expected) => {
+        for (const key in MINIMAL_CORRECT_INPUTS) {
+            process.env[key] = MINIMAL_CORRECT_INPUTS[key];
+        }
+        for (const key in inputs) {
+            process.env[key] = inputs[key];
+        }
+
+        const result = index.generateNextVersion(currentVersion, releaseVersion, new index.Properties()).toString();
         expect(result).toBe(expected);
     });
 });
