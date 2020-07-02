@@ -50,10 +50,10 @@ inputs:
       Format pattern for build metadata. EG: "build.{date[YYYY-MM-dd]}.{hash[0, 6]}". It is also possible not to
       customize variable outputs omitting square braces ([]) or even not to use any variables. Supported variables:
       - date[date_format]: a current date in UTC or time set in 'release-version-build-metadata-datetime' variable.
-      Supports formationg included in square braces ([]). The date format will be applied by "Moment.js". Default format
+      Supports formatting included in square braces ([]). The date format will be applied by "Moment.js". Default format
       is ['YYYY-MM-DD'].
-      library: https://momentjs.com/
-      - hash[begin_index_inclusive, end_index_exclusive]: a commit hash, which trigerred this build. You can shorten
+      Library: https://momentjs.com/
+      - hash[begin_index_inclusive, end_index_exclusive]: a commit hash, which triggered this build. You can shorten
       the hash by specifying begin and end characters indexes included in square braces ([]), separated by a comma.
       Default begin, end values are: [0, 8].
     required: false
@@ -63,7 +63,7 @@ inputs:
     required: false
 
 
-  # Next version increments
+  # Next version
   next-version-increment-major:
     description: 'Increment major version in result NEXT_VERSION'
     required: false
