@@ -65,15 +65,15 @@ inputs:
 
   # Next version
   next-version-increment-major:
-    description: 'Increment major version in result NEXT_VERSION'
+    description: 'Increment major version in result NEXT_VERSION, resets all other versions to "0" and prerelease to "1" if found'
     required: false
     default: 'false'
   next-version-increment-minor:
-    description: 'Increment minor version in result NEXT_VERSION'
+    description: 'Increment minor version in result NEXT_VERSION, resets patch to "0" and prerelease to "1" if found'
     required: false
     default: 'false'
   next-version-increment-patch:
-    description: 'Increment patch version in result NEXT_VERSION'
+    description: 'Increment patch version in result NEXT_VERSION, resets prerelease to "1" if found'
     required: false
     default: 'false'
   next-version-increment-prerelease:

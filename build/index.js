@@ -20694,11 +20694,15 @@ function generateReleaseVersion(currentVersion, properties) {
     return releaseVersion;
 }
 
-function incrementPrerelease(version) {
+function incrementPrerelease(version, reset) {
     let match = XRegExp.exec(version.prerelease, PRERELEASE_NUMBER_REGEX);
     if (match) {
         let prereleaseNumber = parseInt(match[0]);
-        prereleaseNumber += 1;
+        if(reset) {
+            prereleaseNumber = 1;
+        } else {
+            prereleaseNumber += 1;
+        }
         version.prerelease = version.prerelease.substring(0, match["index"]) + prereleaseNumber +
             version.prerelease.substring(match["index"] + match[0].length);
     }
@@ -20709,21 +20713,27 @@ function generateNextVersion(currentVersion, releaseVersion, properties) {
     if (!properties.nextIncrementPrerelease && !properties.nextIncrementPatch && !properties.nextIncrementMinor
         && !properties.nextIncrementMajor) {
         let prerelease = nextVersion.prerelease;
-        incrementPrerelease(nextVersion);
+        incrementPrerelease(nextVersion, false);
         if (prerelease === nextVersion.prerelease) {
             nextVersion.patch += 1;
         }
     } else {
         if (properties.nextIncrementPrerelease) {
-            incrementPrerelease(nextVersion);
+            incrementPrerelease(nextVersion, false);
         }
         if (properties.nextIncrementPatch) {
+            incrementPrerelease(nextVersion, true);
             nextVersion.patch += 1;
         }
         if (properties.nextIncrementMinor) {
+            incrementPrerelease(nextVersion, true);
+            nextVersion.patch = 0;
             nextVersion.minor += 1;
         }
         if (properties.nextIncrementMajor) {
+            incrementPrerelease(nextVersion, true);
+            nextVersion.minor = 0;
+            nextVersion.patch = 0;
             nextVersion.major += 1;
         }
     }
