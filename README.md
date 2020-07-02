@@ -38,6 +38,7 @@ jobs:
         version-source: file
         version-file: gradle.properties
         version-file-extraction-pattern: '(?<=version=).+'
+
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
