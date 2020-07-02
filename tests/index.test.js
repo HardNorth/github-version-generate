@@ -63,18 +63,18 @@ describe("Test toString", () => {
 // Properties creation
 
 const MINIMAL_CORRECT_INPUTS = {
-    "INPUT_version-source": "variable",
-    "INPUT_version": "1.0.0",
-    "INPUT_release-version-cut-snapshot": "true",
-    "INPUT_release-version-cut-build-metadata": "true",
-    "INPUT_release-version-generate-build-metadata": "false",
-    "INPUT_next-version-increment-major": "false",
-    "INPUT_next-version-increment-minor": "false",
-    "INPUT_next-version-increment-patch": "false",
-    "INPUT_next-version-increment-prerelease": "false",
-    "INPUT_release-version-build-metadata-pattern": "build.{date}.{hash}",
-    "INPUT_next-version-cut-build-metadata": "true",
-    "INPUT_next-version-put-build-metadata": "false"
+    "INPUT_VERSION-SOURCE": "variable",
+    "INPUT_VERSION": "1.0.0",
+    "INPUT_RELEASE-VERSION-CUT-SNAPSHOT": "true",
+    "INPUT_RELEASE-VERSION-CUT-BUILD-METADATA": "true",
+    "INPUT_RELEASE-VERSION-GENERATE-BUILD-METADATA": "false",
+    "INPUT_NEXT-VERSION-INCREMENT-MAJOR": "false",
+    "INPUT_NEXT-VERSION-INCREMENT-MINOR": "false",
+    "INPUT_NEXT-VERSION-INCREMENT-PATCH": "false",
+    "INPUT_NEXT-VERSION-INCREMENT-PRERELEASE": "false",
+    "INPUT_RELEASE-VERSION-BUILD-METADATA-PATTERN": "build.{date}.{hash}",
+    "INPUT_NEXT-VERSION-CUT-BUILD-METADATA": "true",
+    "INPUT_NEXT-VERSION-PUT-BUILD-METADATA": "false"
 };
 
 test("Test correct properties input, variable version source", () => {
@@ -85,7 +85,7 @@ test("Test correct properties input, variable version source", () => {
 });
 
 test("Test properties fail if version-source is 'file' and no file specified", () => {
-    const inputs = {MINIMAL_CORRECT_INPUTS, "INPUT_version-source": "file"};
+    const inputs = {MINIMAL_CORRECT_INPUTS, "INPUT_VERSION-SOURCE": "file"};
     for (const key in inputs) {
         process.env[key] = inputs[key];
     }
@@ -97,8 +97,8 @@ test("Test properties fail if version-source is 'file' and no file specified", (
 test("Test properties fail if version-source is 'file' and no 'extraction-pattern' specified", () => {
     const inputs = {
         MINIMAL_CORRECT_INPUTS,
-        "INPUT_version-source": "file",
-        "INPUT_version-file": "tests/resources/version.txt"
+        "INPUT_VERSION-SOURCE": "file",
+        "INPUT_VERSION-FILE": "tests/resources/version.txt"
     };
 
     for (const key in inputs) {
@@ -112,7 +112,7 @@ test("Test properties fail if version-source is 'file' and no 'extraction-patter
 test("Test properties fail if version-source is 'variable' and no 'version' specified", () => {
     const inputs = {
         MINIMAL_CORRECT_INPUTS,
-        "INPUT_version": ""
+        "INPUT_VERSION": ""
     };
 
     for (const key in inputs) {
@@ -187,23 +187,23 @@ const INCORRECT_SNAPSHOT_VERSION = new index.Version({
 
 const RELEASE_VERSION_TEST_CASES = [
     [{}, CURRENT_VERSION, "1.2.3-BETA-7"],
-    [{"INPUT_release-version-cut-build-metadata": "false"}, CURRENT_VERSION, "1.2.3-BETA-7+build.2017-02-03.3e1f4d"],
+    [{"INPUT_RELEASE-VERSION-CUT-BUILD-METADATA": "false"}, CURRENT_VERSION, "1.2.3-BETA-7+build.2017-02-03.3e1f4d"],
     [{
-        "INPUT_release-version-cut-snapshot": "false",
-        "INPUT_release-version-cut-build-metadata": "false"
+        "INPUT_RELEASE-VERSION-CUT-SNAPSHOT": "false",
+        "INPUT_RELEASE-VERSION-CUT-BUILD-METADATA": "false"
     }, CURRENT_VERSION, "1.2.3-BETA-7-SNAPSHOT+build.2017-02-03.3e1f4d"],
-    [{"INPUT_release-version-cut-snapshot": "false"}, CURRENT_VERSION, "1.2.3-BETA-7-SNAPSHOT"],
+    [{"INPUT_RELEASE-VERSION-CUT-SNAPSHOT": "false"}, CURRENT_VERSION, "1.2.3-BETA-7-SNAPSHOT"],
     [{}, INCORRECT_SNAPSHOT_VERSION, "1.2.3-BETA-SNAPSHOT-7"],
     [{
-        "INPUT_release-version-generate-build-metadata": "true"
+        "INPUT_RELEASE-VERSION-GENERATE-BUILD-METADATA": "true"
     }, CURRENT_VERSION, "1.2.3-BETA-7+build." + DATE.getUTCFullYear() + "-" + DATE_FORMAT.format(DATE.getUTCMonth() + 1) + "-" + DATE_FORMAT.format(DATE.getUTCDate()) + ".8278cdaf"],
     [{
-        "INPUT_release-version-generate-build-metadata": "true",
-        "INPUT_release-version-build-metadata-datetime": PAST_DATE.toISOString()
+        "INPUT_RELEASE-VERSION-GENERATE-BUILD-METADATA": "true",
+        "INPUT_RELEASE-VERSION-BUILD-METADATA-DATETIME": PAST_DATE.toISOString()
     }, CURRENT_VERSION, "1.2.3-BETA-7+build." + PAST_DATE.getUTCFullYear() + "-" + DATE_FORMAT.format(PAST_DATE.getUTCMonth() + 1) + "-" + DATE_FORMAT.format(PAST_DATE.getUTCDate()) + ".8278cdaf"],
     [{
-        "INPUT_release-version-generate-build-metadata": "true",
-        "INPUT_release-version-build-metadata-datetime": PAST_DATE.getFullYear() + "-" + (PAST_DATE.getMonth() + 1) + "-" + PAST_DATE.getDate()
+        "INPUT_RELEASE-VERSION-GENERATE-BUILD-METADATA": "true",
+        "INPUT_RELEASE-VERSION-BUILD-METADATA-DATETIME": PAST_DATE.getFullYear() + "-" + (PAST_DATE.getMonth() + 1) + "-" + PAST_DATE.getDate()
     }, CURRENT_VERSION, "1.2.3-BETA-7+build." + PAST_DATE.getUTCFullYear() + "-" + DATE_FORMAT.format(PAST_DATE.getUTCMonth() + 1) + "-" + DATE_FORMAT.format(PAST_DATE.getUTCDate()) + ".8278cdaf"]
 ];
 
@@ -257,17 +257,17 @@ const RELEASE_VERSION = new index.Version({
 
 const NEXT_VERSION_TEST_CASES = [
     [{}, CURRENT_VERSION, RELEASE_VERSION, "1.2.3-BETA-8-SNAPSHOT"],
-    [{"INPUT_next-version-put-build-metadata": "true"}, CURRENT_VERSION, RELEASE_VERSION, "1.2.3-BETA-8-SNAPSHOT+build.2017-02-04.5e2079"],
-    [{"INPUT_next-version-increment-patch": "true"}, CURRENT_VERSION, RELEASE_VERSION, "1.2.4-BETA-7-SNAPSHOT"],
-    [{"INPUT_next-version-increment-minor": "true"}, CURRENT_VERSION, RELEASE_VERSION, "1.3.3-BETA-7-SNAPSHOT"],
-    [{"INPUT_next-version-increment-major": "true"}, CURRENT_VERSION, RELEASE_VERSION, "2.2.3-BETA-7-SNAPSHOT"],
-    [{"INPUT_next-version-increment-prerelease": "true"}, new index.Version({
+    [{"INPUT_NEXT-VERSION-PUT-BUILD-METADATA": "true"}, CURRENT_VERSION, RELEASE_VERSION, "1.2.3-BETA-8-SNAPSHOT+build.2017-02-04.5e2079"],
+    [{"INPUT_NEXT-VERSION-INCREMENT-PATCH": "true"}, CURRENT_VERSION, RELEASE_VERSION, "1.2.4-BETA-7-SNAPSHOT"],
+    [{"INPUT_NEXT-VERSION-INCREMENT-MINOR": "true"}, CURRENT_VERSION, RELEASE_VERSION, "1.3.3-BETA-7-SNAPSHOT"],
+    [{"INPUT_NEXT-VERSION-INCREMENT-MAJOR": "true"}, CURRENT_VERSION, RELEASE_VERSION, "2.2.3-BETA-7-SNAPSHOT"],
+    [{"INPUT_NEXT-VERSION-INCREMENT-PRERELEASE": "true"}, new index.Version({
         ...CURRENT_VERSION,
         prerelease: "SNAPSHOT"
     }), RELEASE_VERSION, "1.2.3-SNAPSHOT"],
     [{
-        "INPUT_next-version-increment-major": "true",
-        "INPUT_next-version-increment-prerelease": "true"
+        "INPUT_NEXT-VERSION-INCREMENT-MAJOR": "true",
+        "INPUT_NEXT-VERSION-INCREMENT-PRERELEASE": "true"
     }, CURRENT_VERSION, RELEASE_VERSION, "2.2.3-BETA-8-SNAPSHOT"]
 ];
 describe("Test next version generation with different properties", () => {
