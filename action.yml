@@ -59,7 +59,7 @@ inputs:
     required: false
     default: 'build.{date}.{hash}'
   release-version-build-metadata-datetime:
-    description: 'A time stamp in ISO format to put into a build metadata string, by default the action uses current time in UTC timezone.'
+    description: 'A time stamp in ISO format to put into a build metadata string, by default the action uses current time in UTC timezone'
     required: false
 
 
@@ -82,8 +82,12 @@ inputs:
     default: 'false'
 
   # Next version additional params
+  next-version-cut-build-metadata:
+    description: 'Remove build metadata suffix from source version'
+    required: false
+    default: 'true'
   next-version-put-build-metadata:
-    description: 'Put build metadata (release date, commit sha, etc.) into result NEXT_VERSION. Will be the same as for release.'
+    description: 'Put build metadata (release date, commit sha, etc.) into result NEXT_VERSION. Will be the same as for RELEASE_VERSION'
     required: false
     default: 'false'
 

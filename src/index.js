@@ -12,9 +12,11 @@ const util = require("util");
 const SEMANTIC_VERSION_REGEX =
     XRegExp("^(?P<major>0|[1-9]\\d*)\\.(?P<minor>0|[1-9]\\d*)\\.(?P<patch>0|[1-9]\\d*)(?:-(?P<prerelease>(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$");
 
-const PRERELEASE_SEPARATOR = "-";
+const PRERELEASE_NUMBER_REGEX =
+    XRegExp("(?<=ALPHA|[Aa]lpha|ALPHA[-\\.]|[Aa]lpha[-\\.])[0-9]+|(?<=BETA|[Bb]eta|BETA[-\\.]|[Bb]eta[-\\.])[0-9]+|(?<=RC|[Rr]c|RC[-\\.]|[Rc]c[-\\.])[0-9]+");
+
 const SNAPSHOT = "SNAPSHOT";
-const SNAPSHOT_SUFFIX = PRERELEASE_SEPARATOR + SNAPSHOT;
+const SNAPSHOT_SUFFIX_REGEX = XRegExp("[-\.]" + SNAPSHOT + "$");
 
 const METADATA_VALIDATION_PATTERN = XRegExp("^(?:[0-9a-zA-Z-.]*{(?:date|hash)(?:\\[[^\\]]*\\])?})*[0-9a-zA-Z-.]*$");
 const METADATA_VARIABLE_EXTRACTION = XRegExp("{(date|hash)(?:\\[([^\\]]*)\\])?}");
@@ -46,12 +48,14 @@ function Properties() {
     this.releaseMetadataTime = core.getInput("release-version-build-metadata-datetime");
 
     // Next version
+    this.nextCutMetadata = core.getInput("next-version-cut-build-metadata") === "true";
     this.nextIncrementMajor = core.getInput("next-version-increment-major", {required: true}) === "true";
     this.nextIncrementMinor = core.getInput("next-version-increment-minor", {required: true}) === "true";
     this.nextIncrementPatch = core.getInput("next-version-increment-patch", {required: true}) === "true";
     this.nextIncrementPrerelease = core.getInput("next-version-increment-prerelease", {required: true}) === "true";
 }
 
+// Make version immutable? Will someone use as API? In collaboration?
 function Version(parseResultArray) {
     this.raw = parseResultArray.input;
     this.major = parseInt(parseResultArray.major);
@@ -147,12 +151,13 @@ function generateMetadata(pattern, model) {
 function generateReleaseVersion(currentVersion, properties) {
     const releaseVersion = new Version(currentVersion);
 
+    let match;
     if (properties.releaseCutSnapshot) {
         let prerelease = releaseVersion.prerelease;
         if (prerelease === SNAPSHOT) {
             prerelease = null;
-        } else if (prerelease.endsWith(SNAPSHOT_SUFFIX)) {
-            prerelease = prerelease.substring(0, prerelease.length - SNAPSHOT_SUFFIX.length);
+        } else if ((match = XRegExp.exec(prerelease, SNAPSHOT_SUFFIX_REGEX))) {
+            prerelease = prerelease.substring(0, match["index"]) + prerelease.substring(match["index"] + match[0].length);
         }
         releaseVersion.prerelease = prerelease;
     }
@@ -171,8 +176,46 @@ function generateReleaseVersion(currentVersion, properties) {
     return releaseVersion;
 }
 
+function incrementPrerelease(version) {
+    let match = XRegExp.exec(version.prerelease, PRERELEASE_NUMBER_REGEX);
+    if (match) {
+        let prereleaseNumber = parseInt(match[0]);
+        prereleaseNumber += 1;
+        version.prerelease = version.prerelease.substring(0, match["index"]) + prereleaseNumber +
+            version.prerelease.substring(match["index"] + match[0].length);
+    }
+}
+
 function generateNextVersion(currentVersion, releaseVersion, properties) {
-    // TODO: finish this
+    const nextVersion = new Version(currentVersion);
+    if (!properties.nextIncrementPrerelease && !properties.nextIncrementPatch && !properties.nextIncrementMinor
+        && !properties.nextIncrementMajor) {
+        let prerelease = nextVersion.prerelease;
+        incrementPrerelease(nextVersion);
+        if (prerelease === nextVersion.prerelease) {
+            nextVersion.patch += 1;
+        }
+    } else {
+        if (properties.nextIncrementPrerelease) {
+            incrementPrerelease(nextVersion);
+        }
+        if (properties.nextIncrementPatch) {
+            nextVersion.patch += 1;
+        }
+        if (properties.nextIncrementMinor) {
+            nextVersion.minor += 1;
+        }
+        if (properties.nextIncrementMajor) {
+            nextVersion.major += 1;
+        }
+    }
+    if (properties.nextCutMetadata) {
+        nextVersion.buildmetadata = null;
+    }
+    if (properties.nextMetadata) {
+        nextVersion.buildmetadata = releaseVersion.buildmetadata;
+    }
+    return nextVersion;
 }
 
 async function run() {
@@ -226,5 +269,7 @@ module.exports = {
     "getFileVersion": getFileVersion,
     "parseVersion": parseVersion,
     "generateReleaseVersion": generateReleaseVersion,
-    "generateMetadata": generateMetadata
+    "generateMetadata": generateMetadata,
+    "generateNextVersion": generateNextVersion,
+    "incrementPrerelease": incrementPrerelease
 };
