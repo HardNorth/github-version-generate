@@ -252,7 +252,7 @@ async function run() {
     core.setOutput("RELEASE_VERSION", releaseVersionStr);
 
     // Parse and set 'NEXT_VERSION' outputs
-    const nextVersion = generateReleaseVersion(parsedVersion, releaseVersion, properties);
+    const nextVersion = generateNextVersion(parsedVersion, releaseVersion, properties);
     const nextVersionStr = nextVersion.toString();
     core.info("Got next version: " + nextVersionStr);
     core.exportVariable("NEXT_VERSION", nextVersionStr);
