@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+## Changed
+- Refactoring, making code more ES6-ish.
 
 ## [1.0.1]
 ### Fixed
