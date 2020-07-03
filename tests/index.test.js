@@ -31,7 +31,7 @@ describe("Test version parse successful", () => {
         ["5.0.0-BETA-16-SNAPSHOT+build.2017-03-15.3ecfad", 5, 0, 0, "BETA-16-SNAPSHOT", "build.2017-03-15.3ecfad"],
         ["5.0.0-TESTNG6-BETA-16-SNAPSHOT+build.2017-03-15.3ecfad", 5, 0, 0, "TESTNG6-BETA-16-SNAPSHOT", "build.2017-03-15.3ecfad"]
     ]).it("When versions is %s", (version, major, minor, patch, prerelease, buildmetadata) => {
-        const result = index.parseVersion(version);
+        const result = index.Version.parseVersion(version);
         expect(result.raw).toBe(version);
         expect(result.major).toBe(major);
         expect(result.minor).toBe(minor);
@@ -241,7 +241,7 @@ describe("Test prerelease increments", () => {
         }
     });
     each(PRERELEASE_INCREMENT_TEST_CASES).it("When version is: '%s'; result should be: '%s'", (input, expected) => {
-        index.incrementPrerelease(input);
+        input.incrementPrerelease();
         expect(input.toString()).toBe(expected);
     });
 });

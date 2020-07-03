@@ -20543,65 +20543,99 @@ const METADATA_DEFAULT_VARIABLE_FORMAT_PATTERNS = {
     hash: "0, 8"
 };
 
+class Properties {
+    constructor() {
+        // Version source
+        this.versionSource = core.getInput("version-source", {required: true});
+        let fileRequired = false;
+        if (this.versionSource === "file") {
+            fileRequired = true;
+        }
+        this.versionFile = core.getInput("version-file", {required: fileRequired});
+        this.versionFileExtractPattern = core.getInput("version-file-extraction-pattern", {required: fileRequired});
+        this.version = core.getInput("version", {required: !fileRequired});
 
-function Properties() {
-    // Version source
-    this.versionSource = core.getInput("version-source", {required: true});
-    let fileRequired = false;
-    if (this.versionSource === "file") {
-        fileRequired = true;
+        // Next version put build metadata
+        this.nextMetadata = core.getInput("next-version-put-build-metadata", {required: true}) === "true";
+
+        // Release version
+        this.releaseCutSnapshot = core.getInput("release-version-cut-snapshot", {required: true}) === "true";
+        this.releaseCutMetadata = core.getInput("release-version-cut-build-metadata", {required: true}) === "true";
+        this.releaseGenerateMetadata = core.getInput("release-version-generate-build-metadata", {required: true}) === "true";
+        this.releaseMetadataPattern = core.getInput("release-version-build-metadata-pattern", {required: this.releaseGenerateMetadata || this.nextMetadata});
+        this.releaseMetadataTime = core.getInput("release-version-build-metadata-datetime");
+
+        // Next version
+        this.nextCutMetadata = core.getInput("next-version-cut-build-metadata") === "true";
+        this.nextIncrementMajor = core.getInput("next-version-increment-major", {required: true}) === "true";
+        this.nextIncrementMinor = core.getInput("next-version-increment-minor", {required: true}) === "true";
+        this.nextIncrementPatch = core.getInput("next-version-increment-patch", {required: true}) === "true";
+        this.nextIncrementPrerelease = core.getInput("next-version-increment-prerelease", {required: true}) === "true";
     }
-    this.versionFile = core.getInput("version-file", {required: fileRequired});
-    this.versionFileExtractPattern = core.getInput("version-file-extraction-pattern", {required: fileRequired});
-    this.version = core.getInput("version", {required: !fileRequired});
-
-    // Next version put build metadata
-    this.nextMetadata = core.getInput("next-version-put-build-metadata", {required: true}) === "true";
-
-    // Release version
-    this.releaseCutSnapshot = core.getInput("release-version-cut-snapshot", {required: true}) === "true";
-    this.releaseCutMetadata = core.getInput("release-version-cut-build-metadata", {required: true}) === "true";
-    this.releaseGenerateMetadata = core.getInput("release-version-generate-build-metadata", {required: true}) === "true";
-    this.releaseMetadataPattern = core.getInput("release-version-build-metadata-pattern", {required: this.releaseGenerateMetadata || this.nextMetadata});
-    this.releaseMetadataTime = core.getInput("release-version-build-metadata-datetime");
-
-    // Next version
-    this.nextCutMetadata = core.getInput("next-version-cut-build-metadata") === "true";
-    this.nextIncrementMajor = core.getInput("next-version-increment-major", {required: true}) === "true";
-    this.nextIncrementMinor = core.getInput("next-version-increment-minor", {required: true}) === "true";
-    this.nextIncrementPatch = core.getInput("next-version-increment-patch", {required: true}) === "true";
-    this.nextIncrementPrerelease = core.getInput("next-version-increment-prerelease", {required: true}) === "true";
 }
 
 // Make version immutable? Will someone use as API? In collaboration?
-function Version(parseResultArray) {
-    this.raw = parseResultArray.input;
-    this.major = parseInt(parseResultArray.major);
-    this.minor = parseInt(parseResultArray.minor);
-    this.patch = parseInt(parseResultArray.patch);
-    if (typeof parseResultArray.prerelease !== "undefined") {
-        this.prerelease = parseResultArray.prerelease;
-    } else {
-        this.prerelease = null;
+class Version {
+    constructor(parseResultArray) {
+        this.raw = parseResultArray.input;
+        this.major = parseInt(parseResultArray.major);
+        this.minor = parseInt(parseResultArray.minor);
+        this.patch = parseInt(parseResultArray.patch);
+        if (typeof parseResultArray.prerelease !== "undefined") {
+            this.prerelease = parseResultArray.prerelease;
+        } else {
+            this.prerelease = null;
+        }
+        if (typeof parseResultArray.buildmetadata !== "undefined") {
+            this.buildmetadata = parseResultArray.buildmetadata;
+        } else {
+            this.buildmetadata = null;
+        }
     }
-    if (typeof parseResultArray.buildmetadata !== "undefined") {
-        this.buildmetadata = parseResultArray.buildmetadata;
-    } else {
-        this.buildmetadata = null;
+
+    _updatePrerelease(reset) {
+        let match = XRegExp.exec(this.prerelease, PRERELEASE_NUMBER_REGEX);
+        if (match) {
+            let prereleaseNumber = parseInt(match[0]);
+            if (reset) {
+                prereleaseNumber = 1;
+            } else {
+                prereleaseNumber += 1;
+            }
+            this.prerelease = this.prerelease.substring(0, match["index"]) + prereleaseNumber +
+                this.prerelease.substring(match["index"] + match[0].length);
+        }
+    }
+
+    incrementPrerelease() {
+        this._updatePrerelease(false);
+    }
+
+    resetPrerelease() {
+        this._updatePrerelease(true);
+    }
+
+    toString() {
+        const result = [];
+        result.push(this.major, ".", this.minor, ".", this.patch);
+        if (this.prerelease) {
+            result.push("-", this.prerelease);
+        }
+        if (this.buildmetadata) {
+            result.push("+", this.buildmetadata);
+        }
+        return result.join("");
+    }
+
+    static parseVersion(versionStr) {
+        const result = XRegExp.exec(versionStr, SEMANTIC_VERSION_REGEX);
+        if (!result) {
+            throw new Error("Unable to parse version: " + escape(versionStr) + "; please check your version syntax, refer: " +
+                "https://semver.org/");
+        }
+        return new Version(result);
     }
 }
-
-Version.prototype.toString = function () {
-    const result = [];
-    result.push(this.major, ".", this.minor, ".", this.patch);
-    if (this.prerelease) {
-        result.push("-", this.prerelease);
-    }
-    if (this.buildmetadata) {
-        result.push("+", this.buildmetadata);
-    }
-    return result.join("");
-};
 
 function getFileContents(file) {
     const readPromise = util.promisify(fs.readFile);
@@ -20624,15 +20658,6 @@ function getFileVersion(versionFile, extractionPattern) {
         }
         return null;
     });
-}
-
-function parseVersion(version) {
-    const result = XRegExp.exec(version, SEMANTIC_VERSION_REGEX);
-    if (!result) {
-        throw new Error("Unable to parse version: " + escape(version) + "; please check your version syntax, refer: " +
-            "https://semver.org/");
-    }
-    return new Version(result);
 }
 
 function generateMetadata(pattern, model) {
@@ -20694,44 +20719,30 @@ function generateReleaseVersion(currentVersion, properties) {
     return releaseVersion;
 }
 
-function incrementPrerelease(version, reset) {
-    let match = XRegExp.exec(version.prerelease, PRERELEASE_NUMBER_REGEX);
-    if (match) {
-        let prereleaseNumber = parseInt(match[0]);
-        if(reset) {
-            prereleaseNumber = 1;
-        } else {
-            prereleaseNumber += 1;
-        }
-        version.prerelease = version.prerelease.substring(0, match["index"]) + prereleaseNumber +
-            version.prerelease.substring(match["index"] + match[0].length);
-    }
-}
-
 function generateNextVersion(currentVersion, releaseVersion, properties) {
     const nextVersion = new Version(currentVersion);
     if (!properties.nextIncrementPrerelease && !properties.nextIncrementPatch && !properties.nextIncrementMinor
         && !properties.nextIncrementMajor) {
         let prerelease = nextVersion.prerelease;
-        incrementPrerelease(nextVersion, false);
+        nextVersion.incrementPrerelease();
         if (prerelease === nextVersion.prerelease) {
             nextVersion.patch += 1;
         }
     } else {
         if (properties.nextIncrementPrerelease) {
-            incrementPrerelease(nextVersion, false);
+            nextVersion.incrementPrerelease();
         }
         if (properties.nextIncrementPatch) {
-            incrementPrerelease(nextVersion, true);
+            nextVersion.resetPrerelease();
             nextVersion.patch += 1;
         }
         if (properties.nextIncrementMinor) {
-            incrementPrerelease(nextVersion, true);
+            nextVersion.resetPrerelease();
             nextVersion.patch = 0;
             nextVersion.minor += 1;
         }
         if (properties.nextIncrementMajor) {
-            incrementPrerelease(nextVersion, true);
+            nextVersion.resetPrerelease();
             nextVersion.minor = 0;
             nextVersion.patch = 0;
             nextVersion.major += 1;
@@ -20749,24 +20760,24 @@ function generateNextVersion(currentVersion, releaseVersion, properties) {
 async function run() {
     const properties = new Properties();
 
-    let version;
+    let versionStr;
     switch (properties.versionSource) {
         case "file":
-            version = await getFileVersion(properties.versionFile, properties.versionFileExtractPattern);
+            versionStr = await getFileVersion(properties.versionFile, properties.versionFileExtractPattern);
             break;
         case "variable":
-            version = properties.version;
+            versionStr = properties.version;
             break;
     }
 
     // Check version extracted
-    if (!version) {
+    if (!versionStr) {
         core.setFailed("Unable to get version: null");
         return;
     }
 
     // Parse and set 'CURRENT_VERSION' outputs
-    const parsedVersion = parseVersion(version);
+    const parsedVersion = Version.parseVersion(versionStr);
     const currentVersionStr = parsedVersion.toString();
     core.info("Got version extracted: " + currentVersionStr);
     core.exportVariable("CURRENT_VERSION", currentVersionStr);
@@ -20795,11 +20806,9 @@ module.exports = {
     "Properties": Properties,
     "Version": Version,
     "getFileVersion": getFileVersion,
-    "parseVersion": parseVersion,
     "generateReleaseVersion": generateReleaseVersion,
     "generateMetadata": generateMetadata,
-    "generateNextVersion": generateNextVersion,
-    "incrementPrerelease": incrementPrerelease
+    "generateNextVersion": generateNextVersion
 };
 
 
