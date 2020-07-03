@@ -1,4 +1,7 @@
 # Version generation for GitHub Actions 
+![CI Build](https://github.com/HardNorth/github-version-generate/workflows/CI%20Build/badge.svg?branch=master)
+
+
 A GitHub action for reading, bumping, generating, formatting applications versions in release pipelines.
 Outputs three environment variables:
 - 'env.CURRENT_VERSION' - a current, extracted version of application without any changes
