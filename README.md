@@ -8,7 +8,7 @@ Outputs three environment variables:
 - 'env.RELEASE_VERSION' - a generated release version
 - 'env.NEXT_VERSION' - a new version supposed to put into version source file instead of CURRENT_VERSION
 
-The action is used so-called "[Semantic version](https://semver.org/)" system, please check out the 
+The action uses so-called "[Semantic version](https://semver.org/)" system, please check out the 
 specification first to avoid misunderstanding and misuses.
 
 By default, without any configuration the action increments prerelease version. Basically it picks a number in a
