@@ -11,16 +11,17 @@ Outputs three environment variables:
 The action is used so-called "[Semantic version](https://semver.org/)" system, please check out the 
 specification first to avoid misunderstanding and misuses.
 
-By default, without any configuration the action increments prerelease version fragment which suites the following 
-regex: 
-`(?<=ALPHA|[Aa]lpha|ALPHA[-\.]|[Aa]lpha[-\.])[0-9]+|(?<=BETA|[Bb]eta|BETA[-\.]|[Bb]eta[-\.])[0-9]+|(?<=RC|[Rr]c|RC[-\.]|[Rc]c[-\.])[0-9]+`.
-Basically it's a substring starting with alpha|beta|rc + a number. It also possible to notate all caps or starting with 
+By default, without any configuration the action increments prerelease version. Basically it picks a number in a
+substring starting with alpha|beta|rc + a number. It also possible to notate all caps or starting with 
 a capital letter (ALPHA, alpha and Alpha are OK).
 
 E.G.:
 - TESTNG7-BETA-7-SNAPSHOT &rarr; TESTNG7-BETA-8-SNAPSHOT
 - rc1 &rarr; rc2
 - TESTNG6-Alpha1 &rarr; Alpha2
+
+Here are some prerelease fragments and a regex which is used to extract the prerelease number:
+https://regex101.com/r/O5GUdN/1
 
 If there is no regex match in prerelease section the patch version fragment will be incremented. You 
 can force action increment a specific version fragment you like by configuring [Next version](#next-version) parameters.
