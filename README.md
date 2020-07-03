@@ -11,10 +11,25 @@ Outputs three environment variables:
 The action is used so-called "[Semantic version](https://semver.org/)" system, please check out the 
 specification first to avoid misunderstanding and misuses.
 
+By default, without any configuration the action increments prerelease version fragment which suites the following 
+regex: 
+`(?<=ALPHA|[Aa]lpha|ALPHA[-\.]|[Aa]lpha[-\.])[0-9]+|(?<=BETA|[Bb]eta|BETA[-\.]|[Bb]eta[-\.])[0-9]+|(?<=RC|[Rr]c|RC[-\.]|[Rc]c[-\.])[0-9]+`.
+E.G.:
+- TESTNG7-BETA-7-SNAPSHOT &rarr; TESTNG7-BETA-8-SNAPSHOT
+- rc1 &rarr; rc2
+- TESTNG6-Alpha1 &rarr; Alpha2
+
+If there is no alpha|beta|rc + number match in prerelease section the patch version fragment will be incremented. You 
+can force action increment a specific version fragment you like by configuring [Next version](#next-version) parameters.
+If any of such parameters were specified the default behavior will be ignored.
+
 ## Usage
 To use the action introduce it into your job steps of a github actions workflow.
 
-For example:
+### Example 1: Java application built with gradle
+A pretty simple pipeline which launches a release task. To update development version back in a release branch Gradle 
+release plugin needs at least one parameter specified (`release.newVersion`). This pipeline provides gradle both 
+necessary versions: which to release and which to commit back into the release branch. 
 ```yaml
 name: Release
 
@@ -51,6 +66,44 @@ jobs:
         ./gradlew release -Prelease.useAutomaticVersion=true -Prelease.releaseVersion=${{ env.RELEASE_VERSION }} \
         -Prelease.newVersion=${{ env.NEXT_VERSION }}
 ```
+
+### Example 2: A specific version fragment incrementation
+The pipeline demonstrates how tou can control which version fragment to increment by a file with a specific word:
+```yaml
+name: release
+
+on:
+  push:
+    branches:
+      - master
+
+env:
+  VERSION_FILE_NAME: 'VERSION'
+  VERSION_BUMP_FILE: 'version_fragment'
+jobs:
+  calculate-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Get version fragment to bump
+        id: getVersionFragment
+        run: |
+          read -r versionFragment < ${{ env.VERSION_BUMP_FILE }}
+          echo "'$versionFragment' version will be incremented"
+          echo "::set-env name=VERSION_FRAGMENT::${versionFragment}"
+
+      - name: Generate versions
+        uses: HardNorth/github-version-generate@v1.0.1
+        with:
+          version-source: file
+          version-file: ${{ env.VERSION_FILE_NAME }}
+          next-version-increment-patch: ${{ contains(env.VERSION_FRAGMENT, 'patch') }}
+          next-version-increment-minor: ${{ contains(env.VERSION_FRAGMENT, 'minor') }}
+          next-version-increment-major: ${{ contains(env.VERSION_FRAGMENT, 'major') }}
+```
+If the content of the `version_fragment` file will be "minor" then minor version will be incremented respectively.
 
 ## Configuration
 
