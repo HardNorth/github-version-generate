@@ -73,7 +73,7 @@ jobs:
 ```
 
 ### Example 2: A specific version fragment incrementation
-The pipeline demonstrates how tou can control which version fragment to increment by a file with a specific word:
+The pipeline demonstrates how you can control which version fragment to increment by a file with a specific keyword:
 ```yaml
 name: release
 
