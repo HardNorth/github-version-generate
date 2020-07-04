@@ -21,7 +21,7 @@ E.G.:
 - TESTNG6-Alpha1 &rarr; Alpha2
 
 Here are some prerelease fragments and a regex which is used to extract the prerelease number:
-https://regex101.com/r/O5GUdN/1
+https://regex101.com/r/O5GUdN/2
 
 If there is no regex match in prerelease section the patch version fragment will be incremented. You 
 can force action increment a specific version fragment you like by configuring [Next version](#next-version) parameters.
