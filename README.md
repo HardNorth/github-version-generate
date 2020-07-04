@@ -67,7 +67,8 @@ jobs:
     - name: Release with Gradle
       id: release
       run: |
-        ./gradlew release -Prelease.useAutomaticVersion=true -Prelease.releaseVersion=${{ env.RELEASE_VERSION }} \
+        ./gradlew release -Prelease.useAutomaticVersion=true \
+        -Prelease.releaseVersion=${{ env.RELEASE_VERSION }} \
         -Prelease.newVersion=${{ env.NEXT_VERSION }}
 ```
 
