@@ -25,7 +25,7 @@ https://regex101.com/r/O5GUdN/2
 
 If there is no regex match in prerelease section the patch version fragment will be incremented. You 
 can force action increment a specific version fragment you like by configuring [Next version](#next-version) parameters.
-If any of such parameters were specified the default behavior will be ignored.
+If any of such parameters was specified the default behavior will be ignored.
 
 ## Usage
 To use the action introduce it into your job steps of a github actions workflow.
