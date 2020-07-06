@@ -1,5 +1,6 @@
 # Version generation for GitHub Actions 
 ![CI Build](https://github.com/HardNorth/github-version-generate/workflows/CI%20Build/badge.svg?branch=master)
+[![License](https://img.shields.io/badge/License-Apache%202.0-brightgreen.svg)](https://opensource.org/licenses/Apache-2.0)
 
 
 A GitHub action for reading, bumping, generating, formatting applications versions in release pipelines.
@@ -55,7 +56,7 @@ jobs:
         java-version: 1.8
 
     - name: Generate versions
-      uses: HardNorth/github-version-generate@v1.0.0
+      uses: HardNorth/github-version-generate@v1.0.1
       with:
         version-source: file
         version-file: gradle.properties
