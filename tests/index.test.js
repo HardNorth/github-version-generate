@@ -29,7 +29,8 @@ describe("Test version parse successful", () => {
         ["5.0.3-SNAPSHOT", 5, 0, 3, "SNAPSHOT", null],
         ["5.0.0-BETA-16-SNAPSHOT", 5, 0, 0, "BETA-16-SNAPSHOT", null],
         ["5.0.0-BETA-16-SNAPSHOT+build.2017-03-15.3ecfad", 5, 0, 0, "BETA-16-SNAPSHOT", "build.2017-03-15.3ecfad"],
-        ["5.0.0-TESTNG6-BETA-16-SNAPSHOT+build.2017-03-15.3ecfad", 5, 0, 0, "TESTNG6-BETA-16-SNAPSHOT", "build.2017-03-15.3ecfad"]
+        ["5.0.0-TESTNG6-BETA-16-SNAPSHOT+build.2017-03-15.3ecfad", 5, 0, 0, "TESTNG6-BETA-16-SNAPSHOT", "build.2017-03-15.3ecfad"],
+        ["0.0.1-ALPHA-SNAPSHOT", 0, 0, 1, "ALPHA-SNAPSHOT", null]
     ]).it("When versions is %s", (version, major, minor, patch, prerelease, buildmetadata) => {
         const result = index.Version.parseVersion(version);
         expect(result.raw).toBe(version);
@@ -231,7 +232,8 @@ PRERELEASE_INCREMENT_TEST_CASES = [
         prerelease: "TESTNG7-BETA-7-SNAPSHOT"
     }), "1.2.3-TESTNG7-BETA-8-SNAPSHOT+build.2017-02-03.3e1f4d"],
     [new index.Version({...CURRENT_VERSION, prerelease: "TESTNG6-RC1"}), "1.2.3-TESTNG6-RC2+build.2017-02-03.3e1f4d"],
-    [new index.Version({...CURRENT_VERSION, prerelease: "TESTNG6-RC-1"}), "1.2.3-TESTNG6-RC-2+build.2017-02-03.3e1f4d"]
+    [new index.Version({...CURRENT_VERSION, prerelease: "TESTNG6-RC-1"}), "1.2.3-TESTNG6-RC-2+build.2017-02-03.3e1f4d"],
+    [new index.Version({...CURRENT_VERSION, prerelease: "ALPHA-SNAPSHOT"}), "1.2.3-ALPHA-SNAPSHOT+build.2017-02-03.3e1f4d"],
 ];
 
 describe("Test prerelease increments", () => {
