@@ -27,10 +27,10 @@
   "dependencies": {
     "@actions/core": "1.2.6",
     "@actions/exec": "1.0.4",
-    "@actions/github": "3.0.0",
+    "@actions/github": "4.0.0",
     "escape-html": "1.0.3",
-    "moment": "2.27.0",
-    "xregexp": "4.3.0"
+    "moment": "2.29.1",
+    "xregexp": "4.4.0"
   },
   "bugs": {
     "url": "https://github.com/HardNorth/github-version-generate/issues"
