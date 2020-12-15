@@ -133,10 +133,10 @@ If the content of the `version_fragment` file will be "minor" then minor version
 ### Next version
 | Parameter                         | Type    | Default value | Description                                         |
 |-----------------------------------|---------|---------------|-----------------------------------------------------|
-| next-version-increment-major      | boolean | false         | Increment major version in result NEXT_VERSION, resets all other versions to "0" and prerelease to "1" if found |
-| next-version-increment-minor      | boolean | false         | Increment minor version in result NEXT_VERSION, resets patch to "0" and prerelease to "1" if found |
-| next-version-increment-patch      | boolean | false         | Increment patch version in result NEXT_VERSION, resets prerelease to "1" if found |
-| next-version-increment-prerelease | boolean | false         | Increment prerelease version in result NEXT_VERSION |
+| next-version-increment-major      | boolean | false         | Increment major version in result NEXT_VERSION, resets all other versions to "0" and prerelease to "1" if found. E.G.: `5.0.3-BETA-3` &rarr; `6.0.0-BETA-1` |
+| next-version-increment-minor      | boolean | false         | Increment minor version in result NEXT_VERSION, resets patch to "0" and prerelease to "1" if found. E.G.: `5.0.3-BETA-3` &rarr; `5.1.0-BETA-1` |
+| next-version-increment-patch      | boolean | false         | Increment patch version in result NEXT_VERSION, resets prerelease to "1" if found. E.G.: `5.0.3-BETA-3` &rarr; `5.0.4-BETA-1` |
+| next-version-increment-prerelease | boolean | false         | Increment prerelease version in result NEXT_VERSION. E.G.: `5.0.3-BETA-3` &rarr; `5.0.3-BETA-4` |
 | next-version-cut-build-metadata   | boolean | true          | Remove build metadata suffix from source version    |
 | next-version-put-build-metadata   | boolean | false         | Put build metadata (release date, commit sha, etc.) into result NEXT_VERSION. Will be the same as for RELEASE_VERSION' |
 
