@@ -118,7 +118,7 @@ If the content of the `version_fragment` file will be "minor" then minor version
 |---------------------------------|----------------------|---------------|-----------------------------------------------|
 | version-source                  | enum{file, variable} | variable      | A source of a CURRENT_VERSION                 |
 | version                         | string               |               | A version variable for version source         |
-| version-file                    | string               |               | A path to a file with which holds a version   |
+| version-file                    | string               |               | A path to a file which holds a version        |
 | version-file-extraction-pattern | string               | .+            | A RegEx to extract version from a version-source file. Should either match a full version, or return it as the first group. E.G: <br /><ul><li>`(?<=version=).+` - pattern match, e.g: 'version=5.0.3-SNAPSHOT' will extract matched string '5.0.3-SNAPSHOT'</li><li>`"version":\s*"([^"]+)"` - group match, will extract the first group. e.g: '"version": "1.0.0",' to '1.0.0'</li></ul>In case if there are groups in a pattern the first group will be extracted.|
 
 ### Release version
