@@ -1,6 +1,6 @@
 {
   "name": "version-generate",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "A GitHub action for reading, bumping, generating, formatting applications versions in release pipelines",
   "main": "index.js",
   "scripts": {
