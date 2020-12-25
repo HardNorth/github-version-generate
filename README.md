@@ -144,6 +144,7 @@ If the content of the `version_fragment` file will be "minor" then minor version
 
 ### Real-life examples
 - [Report Portal](https://reportportal.io/) uses the action to build its agents. E.G.: [JUnit](https://github.com/reportportal/agent-java-junit/blob/master/.github/workflows/release.yml)
+- The action builds using itself, check out [Release](https://github.com/HardNorth/github-version-generate/blob/master/.github/workflows/release.yml) pipeline.
 
 ### License
 Apache License Version 2.0 - [repo link](https://github.com/HardNorth/github-version-generate/blob/master/LICENSE).
