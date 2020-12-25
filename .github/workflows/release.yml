@@ -25,17 +25,17 @@ jobs:
     # Prepare
     - uses: actions/checkout@v2
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v1
-      with:
-        node-version: 12.x
-
     - name: Setup git credentials
       uses: oleksiyrudenko/gha-git-credentials@v2
       with:
         name: 'Vadzim Hushchanskou'
         email: 'vadzim.hushchanskou@gmail.com'
         token: ${{ secrets.GH_TOKEN }}
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: 12.x
 
     - name: Generate versions
       uses: HardNorth/github-version-generate@v1.0.2
