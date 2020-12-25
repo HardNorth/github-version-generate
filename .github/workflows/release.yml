@@ -35,6 +35,7 @@ jobs:
       with:
         name: 'Vadzim Hushchanskou'
         email: 'vadzim.hushchanskou@gmail.com'
+        token: ${{ secrets.GH_TOKEN }}
 
     - name: Generate versions
       uses: HardNorth/github-version-generate@v1.0.2
