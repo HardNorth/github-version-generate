@@ -41,6 +41,7 @@ class Properties {
         this.nextMetadata = core.getInput("next-version-put-build-metadata", {required: true}) === "true";
 
         // Release version
+        this.releaseCutPrerelease = core.getInput("release-version-cut-prerelease", {required: true}) === "true";
         this.releaseCutSnapshot = core.getInput("release-version-cut-snapshot", {required: true}) === "true";
         this.releaseCutMetadata = core.getInput("release-version-cut-build-metadata", {required: true}) === "true";
         this.releaseGenerateMetadata = core.getInput("release-version-generate-build-metadata", {required: true}) === "true";
@@ -48,6 +49,7 @@ class Properties {
         this.releaseMetadataTime = core.getInput("release-version-build-metadata-datetime");
 
         // Next version
+        this.nextCutPrerelease = core.getInput("next-version-cut-prerelease", {required: true}) === "true";
         this.nextCutMetadata = core.getInput("next-version-cut-build-metadata") === "true";
         this.nextIncrementMajor = core.getInput("next-version-increment-major", {required: true}) === "true";
         this.nextIncrementMinor = core.getInput("next-version-increment-minor", {required: true}) === "true";
@@ -176,15 +178,19 @@ function generateMetadata(pattern, model) {
 function generateReleaseVersion(currentVersion, properties) {
     const releaseVersion = new Version(currentVersion);
 
-    let match;
-    if (properties.releaseCutSnapshot) {
-        let prerelease = releaseVersion.prerelease;
-        if (prerelease === SNAPSHOT) {
-            prerelease = null;
-        } else if ((match = XRegExp.exec(prerelease, SNAPSHOT_SUFFIX_REGEX))) {
-            prerelease = prerelease.substring(0, match["index"]) + prerelease.substring(match["index"] + match[0].length);
+    if (properties.releaseCutPrerelease) {
+        releaseVersion.prerelease = null;
+    } else {
+        let match;
+        if (properties.releaseCutSnapshot) {
+            let prerelease = releaseVersion.prerelease;
+            if (prerelease === SNAPSHOT) {
+                prerelease = null;
+            } else if ((match = XRegExp.exec(prerelease, SNAPSHOT_SUFFIX_REGEX))) {
+                prerelease = prerelease.substring(0, match["index"]) + prerelease.substring(match["index"] + match[0].length);
+            }
+            releaseVersion.prerelease = prerelease;
         }
-        releaseVersion.prerelease = prerelease;
     }
 
     if (properties.releaseCutMetadata) {
@@ -205,10 +211,16 @@ function generateNextVersion(currentVersion, releaseVersion, properties) {
     const nextVersion = new Version(currentVersion);
     if (!properties.nextIncrementPrerelease && !properties.nextIncrementPatch && !properties.nextIncrementMinor
         && !properties.nextIncrementMajor) {
-        let prerelease = nextVersion.prerelease;
-        nextVersion.incrementPrerelease();
-        if (prerelease === nextVersion.prerelease) {
+        if(properties.nextCutPrerelease) {
+            // We are going to cut prerelease, increment patch
             nextVersion.patch += 1;
+        } else {
+            let prerelease = nextVersion.prerelease;
+            nextVersion.incrementPrerelease();
+            if (prerelease === nextVersion.prerelease) {
+                // Nothing to increment, increment patch
+                nextVersion.patch += 1;
+            }
         }
     } else {
         if (properties.nextIncrementPrerelease) {
@@ -229,6 +241,9 @@ function generateNextVersion(currentVersion, releaseVersion, properties) {
             nextVersion.patch = 0;
             nextVersion.major += 1;
         }
+    }
+    if (properties.nextCutPrerelease) {
+        nextVersion.prerelease = null;
     }
     if (properties.nextCutMetadata) {
         nextVersion.buildmetadata = null;
