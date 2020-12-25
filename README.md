@@ -126,6 +126,7 @@ If the content of the `version_fragment` file will be "minor" then minor version
 |-----------------------------------------|---------|---------------------|----------------------------------------------------|
 | release-version-cut-snapshot            | boolean | true                | Remove "SNAPSHOT" suffix from source version       |
 | release-version-cut-build-metadata      | boolean | true                | Remove build metadata suffix from source version   |
+| release-version-cut-prerelease          | boolean | false               | Remove prerelease part from source version         |
 | release-version-generate-build-metadata | boolean | false               | Put build metadata (release date, commit sha, etc.) into result RELEASE_VERSION   |
 | release-version-build-metadata-pattern  | string  | build.{date}.{hash} | Format pattern for build metadata. EG: `build.{date[YYYY-MM-dd]}.{hash[0, 6]}`. It is also possible not to customize variable outputs omitting square braces ([]) or even not to use any variables. Supported variables: <br/><ul><li>`date[date_format]`: a current date in UTC or time set in 'release-version-build-metadata-datetime' variable. Supports formatting included in square braces ([]). The date format will be applied by "Moment.js". Default format is `['YYYY-MM-DD']`.<br />Library: https://momentjs.com/ </li><li>`hash[begin_index_inclusive, end_index_exclusive]`: a commit hash, which triggered this build. You can shorten the hash by specifying begin and end characters indexes included in square braces ([]), separated by a comma. Default begin, end values are: `[0, 8]`. |
 | release-version-build-metadata-datetime | string  |                     | A time stamp in ISO format to put into a build metadata string, by default the action uses current time in UTC timezone |
@@ -137,6 +138,7 @@ If the content of the `version_fragment` file will be "minor" then minor version
 | next-version-increment-minor      | boolean | false         | Increment minor version in result NEXT_VERSION, resets patch to "0" and prerelease to "1" if found. E.G.: `5.0.3-BETA-3` &rarr; `5.1.0-BETA-1` |
 | next-version-increment-patch      | boolean | false         | Increment patch version in result NEXT_VERSION, resets prerelease to "1" if found. E.G.: `5.0.3-BETA-3` &rarr; `5.0.4-BETA-1` |
 | next-version-increment-prerelease | boolean | false         | Increment prerelease version in result NEXT_VERSION. E.G.: `5.0.3-BETA-3` &rarr; `5.0.3-BETA-4` |
+| next-version-cut-prerelease       | boolean | false         | Remove prerelease part from source version. In case this parameter is set the action increments patch version by default. |
 | next-version-cut-build-metadata   | boolean | true          | Remove build metadata suffix from source version    |
 | next-version-put-build-metadata   | boolean | false         | Put build metadata (release date, commit sha, etc.) into result NEXT_VERSION. Will be the same as for RELEASE_VERSION' |
 

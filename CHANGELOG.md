@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+### Added
+- `release-version-cut-prerelease` parameter
+- `next-version-cut-prerelease` parameter
 
 ## [1.0.2]
 ### Changed
