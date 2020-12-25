@@ -16,6 +16,8 @@ env:
   CHANGE_LOG_FILE: CHANGELOG.md
   TMP_SUFFIX: _updated
   README_FILE: README.md
+  README_TEMPLATE_FILE: README_TEMPLATE.md
+  README_VERSION_PLACEHOLDER: $LATEST_VERSION
 
 jobs:
   build:
@@ -62,14 +64,12 @@ jobs:
       id: buildUpdate
       run: |
         git add build/index.js
-        git commit -m "Compiled version ${{env.RELEASE_VERSION}}"
+        git commit -m "Compiled version ${{ env.RELEASE_VERSION }}"
 
     - name: Update README.md
       id: readmeUpdate
       run: |
-        sed 's/${{env.CURRENT_VERSION}}/${{env.RELEASE_VERSION}}/g' ${{env.README_FILE}} > ${{env.README_FILE}}${{ env.TMP_SUFFIX }}
-        rm ${{ env.README_FILE }}
-        mv ${{env.README_FILE}}${{ env.TMP_SUFFIX }} ${{ env.README_FILE }}
+        sed 's/${{env.README_VERSION_PLACEHOLDER}}/${{env.RELEASE_VERSION}}/g' ${{env.README_TEMPLATE_FILE}} > ${{env.README_FILE}}
         git add ${{env.README_FILE}}
         git commit -m "Readme update"
 
