@@ -68,12 +68,14 @@ const MINIMAL_CORRECT_INPUTS = {
     "INPUT_VERSION": "1.0.0",
     "INPUT_RELEASE-VERSION-CUT-SNAPSHOT": "true",
     "INPUT_RELEASE-VERSION-CUT-BUILD-METADATA": "true",
+    "INPUT_RELEASE-VERSION-CUT-PRERELEASE": "false",
     "INPUT_RELEASE-VERSION-GENERATE-BUILD-METADATA": "false",
     "INPUT_NEXT-VERSION-INCREMENT-MAJOR": "false",
     "INPUT_NEXT-VERSION-INCREMENT-MINOR": "false",
     "INPUT_NEXT-VERSION-INCREMENT-PATCH": "false",
     "INPUT_NEXT-VERSION-INCREMENT-PRERELEASE": "false",
     "INPUT_RELEASE-VERSION-BUILD-METADATA-PATTERN": "build.{date}.{hash}",
+    "INPUT_NEXT-VERSION-CUT-PRERELEASE": "false",
     "INPUT_NEXT-VERSION-CUT-BUILD-METADATA": "true",
     "INPUT_NEXT-VERSION-PUT-BUILD-METADATA": "false"
 };
@@ -162,7 +164,7 @@ describe("Test metadata generation with different patterns", () => {
     });
 });
 
-// Release version generation
+// RELEASE_VERSION generation
 
 const DATE = new Date(Date.now());
 const PAST_DATE = new Date(2017, 2, 4, 17, 33, 53);
@@ -205,7 +207,11 @@ const RELEASE_VERSION_TEST_CASES = [
     [{
         "INPUT_RELEASE-VERSION-GENERATE-BUILD-METADATA": "true",
         "INPUT_RELEASE-VERSION-BUILD-METADATA-DATETIME": PAST_DATE.getFullYear() + "-" + (PAST_DATE.getMonth() + 1) + "-" + PAST_DATE.getDate()
-    }, CURRENT_VERSION, "1.2.3-BETA-7+build." + PAST_DATE.getUTCFullYear() + "-" + DATE_FORMAT.format(PAST_DATE.getUTCMonth() + 1) + "-" + DATE_FORMAT.format(PAST_DATE.getUTCDate()) + ".8278cdaf"]
+    }, CURRENT_VERSION, "1.2.3-BETA-7+build." + PAST_DATE.getUTCFullYear() + "-" + DATE_FORMAT.format(PAST_DATE.getUTCMonth() + 1) + "-" + DATE_FORMAT.format(PAST_DATE.getUTCDate()) + ".8278cdaf"],
+    [{"INPUT_RELEASE-VERSION-CUT-PRERELEASE": "true"}, CURRENT_VERSION, "1.2.3"],
+    [{
+        "INPUT_RELEASE-VERSION-CUT-PRERELEASE": "true",
+        "INPUT_RELEASE-VERSION-CUT-BUILD-METADATA": "false"}, CURRENT_VERSION, "1.2.3+build.2017-02-03.3e1f4d"]
 ];
 
 describe("Test release version generation with different properties", () => {
@@ -267,10 +273,18 @@ const NEXT_VERSION_TEST_CASES = [
         ...CURRENT_VERSION,
         prerelease: "SNAPSHOT"
     }), RELEASE_VERSION, "1.2.3-SNAPSHOT"],
+    [{}, new index.Version({
+        ...CURRENT_VERSION,
+        prerelease: "SNAPSHOT"
+    }), RELEASE_VERSION, "1.2.4-SNAPSHOT"],
     [{
         "INPUT_NEXT-VERSION-INCREMENT-MAJOR": "true",
         "INPUT_NEXT-VERSION-INCREMENT-PRERELEASE": "true"
-    }, CURRENT_VERSION, RELEASE_VERSION, "2.0.0-BETA-1-SNAPSHOT"]
+    }, CURRENT_VERSION, RELEASE_VERSION, "2.0.0-BETA-1-SNAPSHOT"],
+    [{"INPUT_NEXT-VERSION-CUT-PRERELEASE": "true"}, CURRENT_VERSION, RELEASE_VERSION, "1.2.4"],
+    [{
+        "INPUT_NEXT-VERSION-CUT-PRERELEASE": "true",
+        "INPUT_NEXT-VERSION-INCREMENT-PATCH": "true"}, CURRENT_VERSION, RELEASE_VERSION, "1.2.4"]
 ];
 describe("Test next version generation with different properties", () => {
     each(NEXT_VERSION_TEST_CASES).it("When inputs are '%s'; and current version is: '%s'; and release version is: '%s'; expected is '%s'", (inputs, currentVersion, releaseVersion, expected) => {
