@@ -90,6 +90,7 @@ jobs:
       id: newVersionTag
       run: |
         git tag -a v${{env.RELEASE_VERSION}} -m "Release ${{env.RELEASE_VERSION}}"
+        git push --tags
 
     - name: Read changelog Entry
       id: readChangelogEntry
@@ -135,8 +136,4 @@ jobs:
         mv ${{ env.VERSION_FILE }}${{ env.TMP_SUFFIX }} ${{ env.VERSION_FILE }}
         git add ${{ env.VERSION_FILE }}
         git commit -m "Version update"
-
-    - name: Push changes
-      id: changePush
-      run: |
-        git push --all origin --tags
+        git push
