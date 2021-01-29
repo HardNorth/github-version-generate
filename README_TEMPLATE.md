@@ -56,7 +56,7 @@ jobs:
         java-version: 1.8
 
     - name: Generate versions
-      uses: HardNorth/github-version-generate@$LATEST_VERSION
+      uses: HardNorth/github-version-generate@v$LATEST_VERSION
       with:
         version-source: file
         version-file: gradle.properties
@@ -101,7 +101,7 @@ jobs:
           echo "::set-env name=VERSION_FRAGMENT::${versionFragment}"
 
       - name: Generate versions
-        uses: HardNorth/github-version-generate@$LATEST_VERSION
+        uses: HardNorth/github-version-generate@v$LATEST_VERSION
         with:
           version-source: file
           version-file: ${{ env.VERSION_FILE_NAME }}
