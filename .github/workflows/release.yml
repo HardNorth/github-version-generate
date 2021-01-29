@@ -85,6 +85,7 @@ jobs:
         mv ${{ env.CHANGE_LOG_FILE }}${{ env.TMP_SUFFIX }} ${{ env.CHANGE_LOG_FILE }}
         git add ${{ env.CHANGE_LOG_FILE }}
         git commit -m "Changelog update"
+        git push
 
     - name: Tagging new version
       id: newVersionTag
