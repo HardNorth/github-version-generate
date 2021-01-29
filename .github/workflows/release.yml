@@ -69,8 +69,8 @@ jobs:
     - name: Update README.md
       id: readmeUpdate
       run: |
-        sed 's/${{env.README_VERSION_PLACEHOLDER}}/${{env.RELEASE_VERSION}}/g' ${{env.README_TEMPLATE_FILE}} > ${{env.README_FILE}}
-        git add ${{env.README_FILE}}
+        sed 's/${{ env.README_VERSION_PLACEHOLDER }}/${{ env.RELEASE_VERSION }}/g' ${{ env.README_TEMPLATE_FILE }} > ${{ env.README_FILE }}
+        git add ${{ env.README_FILE }}
         git commit -m "Readme update"
 
     - name: Update CHANGELOG.md
@@ -78,7 +78,7 @@ jobs:
       run: |
         sed '/\[Unreleased\]/q' ${{ env.CHANGE_LOG_FILE }} >> ${{ env.CHANGE_LOG_FILE }}${{ env.TMP_SUFFIX }}
         sed -E '1,/#?#\s*\[Unreleased\]/d' ${{ env.CHANGE_LOG_FILE }} | sed -E '/#?#\s*\[/q' | \
-        { echo -e '\n## [${{env.RELEASE_VERSION}}]'; sed '$d'; } >> ${{ env.CHANGE_LOG_FILE }}${{ env.TMP_SUFFIX }}
+        { echo -e '\n## [${{ env.RELEASE_VERSION }}]'; sed '$d'; } >> ${{ env.CHANGE_LOG_FILE }}${{ env.TMP_SUFFIX }}
         grep -E '#?#\s*\[[0-9]' ${{ env.CHANGE_LOG_FILE }} | head -n1 >> ${{ env.CHANGE_LOG_FILE }}${{ env.TMP_SUFFIX }}
         sed -E '1,/#?#\s*\[[0-9]/d' ${{ env.CHANGE_LOG_FILE }} >> ${{ env.CHANGE_LOG_FILE }}${{ env.TMP_SUFFIX }}
         rm ${{ env.CHANGE_LOG_FILE }}
@@ -89,8 +89,8 @@ jobs:
     - name: Tagging new version
       id: newVersionTag
       run: |
-        git tag -a v${{env.RELEASE_VERSION}} -m "Release ${{env.RELEASE_VERSION}}"
-        git push origin master --tags
+        git tag -a v${{ env.RELEASE_VERSION }} -m "Release ${{ env.RELEASE_VERSION }}"
+        git push --tags
 
     - name: Read changelog Entry
       id: readChangelogEntry
@@ -136,4 +136,4 @@ jobs:
         mv ${{ env.VERSION_FILE }}${{ env.TMP_SUFFIX }} ${{ env.VERSION_FILE }}
         git add ${{ env.VERSION_FILE }}
         git commit -m "Version update"
-        git push origin develop
+        git push
