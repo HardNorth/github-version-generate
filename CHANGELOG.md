@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+### Changed
+- Some inderect dependencies were updated by dependabot
 
 ## [1.1.0]
 ### Added
