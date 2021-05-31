@@ -1,5 +1,5 @@
 # Version generation for GitHub Actions 
-![CI Build](https://github.com/HardNorth/github-version-generate/workflows/CI%20Build/badge.svg?branch=master)
+[![CI Build](https://github.com/HardNorth/github-version-generate/actions/workflows/ci.yml/badge.svg)](https://github.com/HardNorth/github-version-generate/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-brightgreen.svg)](https://opensource.org/licenses/Apache-2.0)
 
 
