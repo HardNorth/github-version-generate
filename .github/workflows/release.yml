@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     branches:
-    - master
+    - main
     paths-ignore:
     - README.md
     - CHANGELOG.md
@@ -39,7 +39,7 @@ jobs:
         node-version: 12.x
 
     - name: Generate versions
-      uses: HardNorth/github-version-generate@v1.1.0
+      uses: HardNorth/github-version-generate@v1.1.1
       with:
         version-source: file
         version-file: ${{ env.VERSION_FILE }}
@@ -113,7 +113,7 @@ jobs:
         prerelease: false
 
     - name: Checkout develop branch
-      if: ${{github.ref}} == 'master'
+      if: ${{github.ref}} == 'main'
       uses: actions/checkout@v2
       with:
         ref: 'develop'
@@ -121,11 +121,11 @@ jobs:
 
     - name: Merge release branch into develop
       id: mergeIntoDevelop
-      if: ${{github.ref}} == 'master'
+      if: ${{github.ref}} == 'main'
       run: |
-        git merge -m 'Merge master branch into develop after a release' origin/master
+        git merge -m 'Merge main branch into develop after a release' origin/main
         git status | (! grep -Fq 'both modified:') || git status | grep -F 'both modified:' \
-        | { echo -e 'Unable to merge master into develop, merge conflicts:'; (! grep -Eo '[^ ]+$') }
+        | { echo -e 'Unable to merge main into develop, merge conflicts:'; (! grep -Eo '[^ ]+$') }
 
     - name: Update version file
       id: versionFileUpdate
