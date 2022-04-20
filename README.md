@@ -1,5 +1,5 @@
-# Version generation and bump for GitHub Actions 
-[![CI Build](https://github.com/HardNorth/github-version-generate/actions/workflows/ci.yml/badge.svg)](https://github.com/HardNorth/github-version-generate/actions/workflows/ci.yml)
+# Version generation for GitHub Actions 
+![CI Build](https://github.com/HardNorth/github-version-generate/workflows/CI%20Build/badge.svg?branch=master)
 [![License](https://img.shields.io/badge/License-Apache%202.0-brightgreen.svg)](https://opensource.org/licenses/Apache-2.0)
 
 
@@ -56,7 +56,7 @@ jobs:
         java-version: 1.8
 
     - name: Generate versions
-      uses: HardNorth/github-version-generate@v1.1.1
+      uses: HardNorth/github-version-generate@v1.1.2
       with:
         version-source: file
         version-file: gradle.properties
@@ -101,7 +101,7 @@ jobs:
           echo "::set-env name=VERSION_FRAGMENT::${versionFragment}"
 
       - name: Generate versions
-        uses: HardNorth/github-version-generate@v1.1.1
+        uses: HardNorth/github-version-generate@v1.1.2
         with:
           version-source: file
           version-file: ${{ env.VERSION_FILE_NAME }}
