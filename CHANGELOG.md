@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [1.1.2]
 ### Changed
 - Some security fixes, by @dependabot
 
