@@ -123,15 +123,15 @@ class Version {
 
 function getFileContents(file) {
     const readPromise = util.promisify(fs.readFile);
-    return readPromise(file, {"encoding": "utf-8"});
+    return readPromise(file);
 }
 
 function getFileVersion(versionFile, extractionPattern) {
     const fileContent = getFileContents(versionFile);
 
     return fileContent.then((content) => {
-        const pattern = XRegExp(extractionPattern, ["g"]);
-        const match = XRegExp.exec(content, pattern);
+        const pattern = XRegExp(extractionPattern, "g");
+        const match = XRegExp.exec(content.toString("utf-8"), pattern);
 
         if (match) {
             if (match.length > 1) {
@@ -168,7 +168,7 @@ function generateMetadata(pattern, model) {
             result = moment(model["date"]).format(format.trim());
         } else {
             const formatValues = format.split(/\s*,\s*/);
-            result = model["hash"].substring(formatValues[0].trimLeft(), formatValues[1].trimRight());
+            result = model["hash"].substring(parseInt(formatValues[0].trimStart()), parseInt(formatValues[1].trimEnd()));
         }
         metadata = metadata.substring(0, variable["index"]) + result + metadata.substring(variable["index"] + variable[0].length);
     }

@@ -3,6 +3,7 @@ process.env["GITHUB_SHA"] = "8278cdafa198a07b718945a97602bbffa5511f2b";
 const each = require("jest-each").default;
 
 const index = require("../src/index");
+const {beforeAll, describe, test, expect} = require("@jest/globals");
 
 describe("Test version file read successful", () => {
     each([
