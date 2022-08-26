@@ -101,19 +101,20 @@ inputs:
 
   # Other stuff
   data-extract:
+    required: false
     description: |
       A map of 'variable name' -> { file path and RegEx pattern } of data which should be extracted from files and
       put into environment variables.
-      
+
       Schema:
-      
+
       data-extract:
         first_variable:
           path: '/path/to/file'
           pattern: '(?<=variable.name=).+'
           extract-name: [true/false] (default 'false')
           extract-all: [true/false] (default 'false')
-      
+
       There are several different use cases depending on RegEx format and flags:
       * RegEx Match only - As on example, above. Variable name will be used 'as is', variable value will be set on
         matched text.
@@ -127,14 +128,12 @@ inputs:
       * 'extract-all' true, 'extract-name' true, pattern match or single group - error, it's not possible to fulfill the
         condition; Two or more groups - the first group will used as variable name and the second group will be used 
         as value. If there are more than one variable with the same name the index will be added to it as in the point
-        above. 
-      
+        above.
+
       Variable name convert rules:
       * Spaces and symbol '-' will be converted to '_';
       * Other special characters except digits and letters will be cut off;
-      * The variable name will be converted to upper case.     
-
-    required: false
+      * The variable name will be converted to upper case.
 outputs:
   CURRENT_VERSION:
     description: 'A version grabbed from a variable or a file without any changes'
