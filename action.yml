@@ -44,6 +44,7 @@ inputs:
     description: 'Remove build metadata suffix from source version'
     required: false
     default: 'true'
+
   # Build metadata
   release-version-generate-build-metadata:
     description: 'Put build metadata (release date, commit sha, etc.) into result RELEASE_VERSION'
@@ -65,7 +66,6 @@ inputs:
   release-version-build-metadata-datetime:
     description: 'A time stamp in ISO format to put into a build metadata string, by default the action uses current time in UTC timezone'
     required: false
-
 
   # Next version
   next-version-increment-major:
@@ -99,6 +99,42 @@ inputs:
     required: false
     default: 'false'
 
+  # Other stuff
+  data-extract:
+    description: |
+      A map of 'variable name' -> { file path and RegEx pattern } of data which should be extracted from files and
+      put into environment variables.
+      
+      Schema:
+      
+      data-extract:
+        first_variable:
+          path: '/path/to/file'
+          pattern: '(?<=variable.name=).+'
+          extract-name: [true/false] (default 'false')
+          extract-all: [true/false] (default 'false')
+      
+      There are several different use cases depending on RegEx format and flags:
+      * RegEx Match only - As on example, above. Variable name will be used 'as is', variable value will be set on
+        matched text.
+      * One group - Variable name will be used 'as is', variable value will be set on group value.
+      * Two or more groups - If 'extract-name' value set to 'false' then the first group will be used as value, and
+        other groups will be ignored, if it is set to true, then the first group will used as variable name and the
+        second group will be used as value.
+      * 'extract-all' true, pattern match or single group - the action will extract all RegEx matches and export the
+        amount of variables with underscore and variable index as suffix. E.G.: first_variable -> FIRST_VARIABLE_0,
+        FIRST_VARIABLE_1, etc; Two or more groups - the first group will used as variable, other groups will be ignored.
+      * 'extract-all' true, 'extract-name' true, pattern match or single group - error, it's not possible to fulfill the
+        condition; Two or more groups - the first group will used as variable name and the second group will be used 
+        as value. If there are more than one variable with the same name the index will be added to it as in the point
+        above. 
+      
+      Variable name convert rules:
+      * Spaces and symbol '-' will be converted to '_';
+      * Other special characters except digits and letters will be cut off;
+      * The variable name will be converted to upper case.     
+
+    required: false
 outputs:
   CURRENT_VERSION:
     description: 'A version grabbed from a variable or a file without any changes'
