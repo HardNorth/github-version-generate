@@ -55,6 +55,9 @@ class Properties {
         this.nextIncrementMinor = core.getBooleanInput("next-version-increment-minor", {required: true, trimWhitespace: true});
         this.nextIncrementPatch = core.getBooleanInput("next-version-increment-patch", {required: true, trimWhitespace: true});
         this.nextIncrementPrerelease = core.getBooleanInput("next-version-increment-prerelease", {required: true, trimWhitespace: true});
+
+        // Other stuff
+        this.dataExtractStr = core.getInput("data-extract");
     }
 }
 
@@ -256,6 +259,8 @@ function generateNextVersion(currentVersion, releaseVersion, properties) {
 
 async function run() {
     const properties = new Properties();
+
+    core.notice("Got 'data-extract': " + properties.dataExtractStr);
 
     let versionStr;
     switch (properties.versionSource) {
