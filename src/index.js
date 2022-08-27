@@ -28,7 +28,7 @@ const METADATA_DEFAULT_VARIABLE_FORMAT_PATTERNS = {
 class Properties {
     constructor() {
         // Version source
-        this.versionSource = core.getInput("version-source", {required: true});
+        this.versionSource = core.getInput("version-source", {required: true, trimWhitespace: true});
         let fileRequired = false;
         if (this.versionSource === "file") {
             fileRequired = true;
@@ -38,23 +38,23 @@ class Properties {
         this.version = core.getInput("version", {required: !fileRequired});
 
         // Next version put build metadata
-        this.nextMetadata = core.getInput("next-version-put-build-metadata", {required: true}) === "true";
+        this.nextMetadata = core.getBooleanInput("next-version-put-build-metadata", {required: true, trimWhitespace: true});
 
         // Release version
-        this.releaseCutPrerelease = core.getInput("release-version-cut-prerelease", {required: true}) === "true";
-        this.releaseCutSnapshot = core.getInput("release-version-cut-snapshot", {required: true}) === "true";
-        this.releaseCutMetadata = core.getInput("release-version-cut-build-metadata", {required: true}) === "true";
-        this.releaseGenerateMetadata = core.getInput("release-version-generate-build-metadata", {required: true}) === "true";
+        this.releaseCutPrerelease = core.getBooleanInput("release-version-cut-prerelease", {required: true, trimWhitespace: true});
+        this.releaseCutSnapshot = core.getBooleanInput("release-version-cut-snapshot", {required: true, trimWhitespace: true});
+        this.releaseCutMetadata = core.getBooleanInput("release-version-cut-build-metadata", {required: true, trimWhitespace: true});
+        this.releaseGenerateMetadata = core.getBooleanInput("release-version-generate-build-metadata", {required: true, trimWhitespace: true});
         this.releaseMetadataPattern = core.getInput("release-version-build-metadata-pattern", {required: this.releaseGenerateMetadata || this.nextMetadata});
         this.releaseMetadataTime = core.getInput("release-version-build-metadata-datetime");
 
         // Next version
-        this.nextCutPrerelease = core.getInput("next-version-cut-prerelease", {required: true}) === "true";
-        this.nextCutMetadata = core.getInput("next-version-cut-build-metadata") === "true";
-        this.nextIncrementMajor = core.getInput("next-version-increment-major", {required: true}) === "true";
-        this.nextIncrementMinor = core.getInput("next-version-increment-minor", {required: true}) === "true";
-        this.nextIncrementPatch = core.getInput("next-version-increment-patch", {required: true}) === "true";
-        this.nextIncrementPrerelease = core.getInput("next-version-increment-prerelease", {required: true}) === "true";
+        this.nextCutPrerelease = core.getBooleanInput("next-version-cut-prerelease", {required: true, trimWhitespace: true});
+        this.nextCutMetadata = core.getBooleanInput("next-version-cut-build-metadata", {trimWhitespace: true});
+        this.nextIncrementMajor = core.getBooleanInput("next-version-increment-major", {required: true, trimWhitespace: true});
+        this.nextIncrementMinor = core.getBooleanInput("next-version-increment-minor", {required: true, trimWhitespace: true});
+        this.nextIncrementPatch = core.getBooleanInput("next-version-increment-patch", {required: true, trimWhitespace: true});
+        this.nextIncrementPrerelease = core.getBooleanInput("next-version-increment-prerelease", {required: true, trimWhitespace: true});
     }
 }
 
