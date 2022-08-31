@@ -78,7 +78,8 @@ const MINIMAL_CORRECT_INPUTS = {
     "INPUT_RELEASE-VERSION-BUILD-METADATA-PATTERN": "build.{date}.{hash}",
     "INPUT_NEXT-VERSION-CUT-PRERELEASE": "false",
     "INPUT_NEXT-VERSION-CUT-BUILD-METADATA": "true",
-    "INPUT_NEXT-VERSION-PUT-BUILD-METADATA": "false"
+    "INPUT_NEXT-VERSION-PUT-BUILD-METADATA": "false",
+    "INPUT_DATA-EXTRACT": "false"
 };
 
 test("Test correct properties input, variable version source", () => {
