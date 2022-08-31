@@ -24,7 +24,6 @@ test("Test getFileVersion function throws exception on not existing file", async
     });
 });
 
-
 describe("Test version parse successful", () => {
     each([
         ["5.0.3-SNAPSHOT", 5, 0, 3, "SNAPSHOT", null],
@@ -213,7 +212,8 @@ const RELEASE_VERSION_TEST_CASES = [
     [{"INPUT_RELEASE-VERSION-CUT-PRERELEASE": "true"}, CURRENT_VERSION, "1.2.3"],
     [{
         "INPUT_RELEASE-VERSION-CUT-PRERELEASE": "true",
-        "INPUT_RELEASE-VERSION-CUT-BUILD-METADATA": "false"}, CURRENT_VERSION, "1.2.3+build.2017-02-03.3e1f4d"]
+        "INPUT_RELEASE-VERSION-CUT-BUILD-METADATA": "false"
+    }, CURRENT_VERSION, "1.2.3+build.2017-02-03.3e1f4d"]
 ];
 
 describe("Test release version generation with different properties", () => {
@@ -241,7 +241,10 @@ PRERELEASE_INCREMENT_TEST_CASES = [
     }), "1.2.3-TESTNG7-BETA-8-SNAPSHOT+build.2017-02-03.3e1f4d"],
     [new index.Version({...CURRENT_VERSION, prerelease: "TESTNG6-RC1"}), "1.2.3-TESTNG6-RC2+build.2017-02-03.3e1f4d"],
     [new index.Version({...CURRENT_VERSION, prerelease: "TESTNG6-RC-1"}), "1.2.3-TESTNG6-RC-2+build.2017-02-03.3e1f4d"],
-    [new index.Version({...CURRENT_VERSION, prerelease: "ALPHA-SNAPSHOT"}), "1.2.3-ALPHA-SNAPSHOT+build.2017-02-03.3e1f4d"],
+    [new index.Version({
+        ...CURRENT_VERSION,
+        prerelease: "ALPHA-SNAPSHOT"
+    }), "1.2.3-ALPHA-SNAPSHOT+build.2017-02-03.3e1f4d"]
 ];
 
 describe("Test prerelease increments", () => {
@@ -286,7 +289,8 @@ const NEXT_VERSION_TEST_CASES = [
     [{"INPUT_NEXT-VERSION-CUT-PRERELEASE": "true"}, CURRENT_VERSION, RELEASE_VERSION, "1.2.4"],
     [{
         "INPUT_NEXT-VERSION-CUT-PRERELEASE": "true",
-        "INPUT_NEXT-VERSION-INCREMENT-PATCH": "true"}, CURRENT_VERSION, RELEASE_VERSION, "1.2.4"]
+        "INPUT_NEXT-VERSION-INCREMENT-PATCH": "true"
+    }, CURRENT_VERSION, RELEASE_VERSION, "1.2.4"]
 ];
 describe("Test next version generation with different properties", () => {
     each(NEXT_VERSION_TEST_CASES).it("When inputs are '%s'; and current version is: '%s'; and release version is: '%s'; expected is '%s'", (inputs, currentVersion, releaseVersion, expected) => {

@@ -89,8 +89,14 @@ class Properties {
         // Other stuff
         this.dataExtract = core.getBooleanInput("data-extract", {trimWhitespace: true});
         this.dataExtractName = core.getInput("data-extract-name");
-        this.dataExtractPaths = core.getInput("data-extract-paths", {required: this.dataExtract});
-        this.dataExtractPatterns = core.getInput("data-extract-patterns", {required: this.dataExtract});
+        this.dataExtractPaths = core.getInput("data-extract-paths", {
+            required: this.dataExtract,
+            trimWhitespace: true
+        });
+        this.dataExtractPatterns = core.getInput("data-extract-patterns", {
+            required: this.dataExtract,
+            trimWhitespace: true
+        });
     }
 }
 
@@ -290,6 +296,20 @@ function generateNextVersion(currentVersion, releaseVersion, properties) {
     return nextVersion;
 }
 
+function extractData(properties) {
+    const patterns = properties.dataExtractPatterns.split(/;\s*/).map(pattern => {
+        return pattern;
+    });
+    const files = properties.dataExtractPaths.split(/;\s*/).map(file => getFileContents(file));
+    files.forEach(file => {
+        file.then(content => {
+
+        })
+    })
+
+    return Promise.all(files);
+}
+
 async function run() {
     const properties = new Properties();
 
@@ -329,6 +349,19 @@ async function run() {
     core.info("Got next version: " + nextVersionStr);
     core.exportVariable("NEXT_VERSION", nextVersionStr);
     core.setOutput("NEXT_VERSION", nextVersionStr);
+
+    // Parse and set extracted data
+    if(!properties.dataExtract) {
+        return;
+    }
+    const extractedData = extractData(properties);
+    const variables = extractedData.keys();
+    variables.sort();
+    core.info("Got extracted data variables: " + variables.join("; "));
+    for (const key of variables) {
+        core.exportVariable(key, extractedData[key]);
+        core.setOutput(key, extractedData[key]);
+    }
 }
 
 run().catch(error => {
