@@ -102,6 +102,7 @@ inputs:
   # Other stuff
   data-extract:
     required: false
+    default: 'false'
     description: |
       Enable data extraction mechanism.
       
@@ -129,8 +130,6 @@ inputs:
       * Spaces and symbol '-' will be converted to '_';
       * Other special characters except digits and letters will be cut off;
       * The variable name will be converted to upper case.
-
-    default: 'false'
   data-extract-name:
     required: false
     description: |

@@ -38,26 +38,59 @@ class Properties {
         this.version = core.getInput("version", {required: !fileRequired});
 
         // Next version put build metadata
-        this.nextMetadata = core.getBooleanInput("next-version-put-build-metadata", {required: true, trimWhitespace: true});
+        this.nextMetadata = core.getBooleanInput("next-version-put-build-metadata", {
+            required: true,
+            trimWhitespace: true
+        });
 
         // Release version
-        this.releaseCutPrerelease = core.getBooleanInput("release-version-cut-prerelease", {required: true, trimWhitespace: true});
-        this.releaseCutSnapshot = core.getBooleanInput("release-version-cut-snapshot", {required: true, trimWhitespace: true});
-        this.releaseCutMetadata = core.getBooleanInput("release-version-cut-build-metadata", {required: true, trimWhitespace: true});
-        this.releaseGenerateMetadata = core.getBooleanInput("release-version-generate-build-metadata", {required: true, trimWhitespace: true});
+        this.releaseCutPrerelease = core.getBooleanInput("release-version-cut-prerelease", {
+            required: true,
+            trimWhitespace: true
+        });
+        this.releaseCutSnapshot = core.getBooleanInput("release-version-cut-snapshot", {
+            required: true,
+            trimWhitespace: true
+        });
+        this.releaseCutMetadata = core.getBooleanInput("release-version-cut-build-metadata", {
+            required: true,
+            trimWhitespace: true
+        });
+        this.releaseGenerateMetadata = core.getBooleanInput("release-version-generate-build-metadata", {
+            required: true,
+            trimWhitespace: true
+        });
         this.releaseMetadataPattern = core.getInput("release-version-build-metadata-pattern", {required: this.releaseGenerateMetadata || this.nextMetadata});
         this.releaseMetadataTime = core.getInput("release-version-build-metadata-datetime");
 
         // Next version
-        this.nextCutPrerelease = core.getBooleanInput("next-version-cut-prerelease", {required: true, trimWhitespace: true});
+        this.nextCutPrerelease = core.getBooleanInput("next-version-cut-prerelease", {
+            required: true,
+            trimWhitespace: true
+        });
         this.nextCutMetadata = core.getBooleanInput("next-version-cut-build-metadata", {trimWhitespace: true});
-        this.nextIncrementMajor = core.getBooleanInput("next-version-increment-major", {required: true, trimWhitespace: true});
-        this.nextIncrementMinor = core.getBooleanInput("next-version-increment-minor", {required: true, trimWhitespace: true});
-        this.nextIncrementPatch = core.getBooleanInput("next-version-increment-patch", {required: true, trimWhitespace: true});
-        this.nextIncrementPrerelease = core.getBooleanInput("next-version-increment-prerelease", {required: true, trimWhitespace: true});
+        this.nextIncrementMajor = core.getBooleanInput("next-version-increment-major", {
+            required: true,
+            trimWhitespace: true
+        });
+        this.nextIncrementMinor = core.getBooleanInput("next-version-increment-minor", {
+            required: true,
+            trimWhitespace: true
+        });
+        this.nextIncrementPatch = core.getBooleanInput("next-version-increment-patch", {
+            required: true,
+            trimWhitespace: true
+        });
+        this.nextIncrementPrerelease = core.getBooleanInput("next-version-increment-prerelease", {
+            required: true,
+            trimWhitespace: true
+        });
 
         // Other stuff
-        this.dataExtractStr = core.getInput("data-extract");
+        this.dataExtract = core.getBooleanInput("data-extract", {trimWhitespace: true});
+        this.dataExtractName = core.getInput("data-extract-name");
+        this.dataExtractPaths = core.getInput("data-extract-paths", {required: this.dataExtract});
+        this.dataExtractPatterns = core.getInput("data-extract-patterns", {required: this.dataExtract});
     }
 }
 
@@ -214,7 +247,7 @@ function generateNextVersion(currentVersion, releaseVersion, properties) {
     const nextVersion = new Version(currentVersion);
     if (!properties.nextIncrementPrerelease && !properties.nextIncrementPatch && !properties.nextIncrementMinor
         && !properties.nextIncrementMajor) {
-        if(properties.nextCutPrerelease) {
+        if (properties.nextCutPrerelease) {
             // We are going to cut prerelease, increment patch
             nextVersion.patch += 1;
         } else {
@@ -259,8 +292,6 @@ function generateNextVersion(currentVersion, releaseVersion, properties) {
 
 async function run() {
     const properties = new Properties();
-
-    core.notice("Got 'data-extract': " + properties.dataExtractStr);
 
     let versionStr;
     switch (properties.versionSource) {
