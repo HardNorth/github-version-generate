@@ -25,6 +25,8 @@ const METADATA_DEFAULT_VARIABLE_FORMAT_PATTERNS = {
     hash: "0, 8"
 };
 
+const REGEX_PATTERN = /^\/(.*?)\/([a-zA-Z]*)$/;
+
 class Properties {
     constructor() {
         // Version source
@@ -296,16 +298,36 @@ function generateNextVersion(currentVersion, releaseVersion, properties) {
     return nextVersion;
 }
 
+function toRegEx(inputStr) {
+    const patternResult = XRegExp.exec(inputStr, REGEX_PATTERN);
+    if (!patternResult) {
+        throw new Error("Unable to parse RegEx: " + escape(inputStr) + "; please the check syntax");
+    }
+    const patternStr = patternResult[1];
+    const flags = patternResult[2];
+    let pattern;
+    try {
+        pattern = XRegExp(patternStr, flags);
+    } catch (error) {
+        if (error instanceof SyntaxError) {
+            throw new Error("Unable to parse RegEx: " + escape(inputStr) + "; please the check syntax: " + error.message);
+        } else {
+            throw new Error("Unknown error occurred parsing RegEx: " + escape(inputStr) + ": " + error.message);
+        }
+    }
+
+    return pattern;
+}
+
 function extractData(properties) {
-    const patterns = properties.dataExtractPatterns.split(/;\s*/).map(pattern => {
-        return pattern;
-    });
+    const patterns = properties.dataExtractPatterns.split(/;\s*/).map(toRegEx);
     const files = properties.dataExtractPaths.split(/;\s*/).map(file => getFileContents(file));
     files.forEach(file => {
-        file.then(content => {
+        file.then(buffer => {
+            const content = buffer.toString("utf-8");
 
-        })
-    })
+        });
+    });
 
     return Promise.all(files);
 }
@@ -351,7 +373,7 @@ async function run() {
     core.setOutput("NEXT_VERSION", nextVersionStr);
 
     // Parse and set extracted data
-    if(!properties.dataExtract) {
+    if (!properties.dataExtract) {
         return;
     }
     const extractedData = extractData(properties);
@@ -374,5 +396,6 @@ module.exports = {
     "getFileVersion": getFileVersion,
     "generateReleaseVersion": generateReleaseVersion,
     "generateMetadata": generateMetadata,
-    "generateNextVersion": generateNextVersion
+    "generateNextVersion": generateNextVersion,
+    "toRegEx": toRegEx
 };

@@ -305,3 +305,13 @@ describe("Test next version generation with different properties", () => {
         expect(result).toBe(expected);
     });
 });
+
+test("Test RegEx conversion", () => {
+    const inputs = MINIMAL_CORRECT_INPUTS;
+
+    for (const key in inputs) {
+        process.env[key] = inputs[key];
+    }
+    const result = index.toRegEx("/(?<=variable.name=).+/i");
+    const result2 = index.toRegEx("/(?<=variable.name=/+).+/dqi");
+});
