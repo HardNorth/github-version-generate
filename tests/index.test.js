@@ -388,7 +388,12 @@ const DATA_EXTRACTION_CASES = [
     }, {
         "TEST_NAME_1": "5.0.0-BETA-16-SNAPSHOT"
     }]],
-    ["tests/resources/simple_gradle.properties; tests/resources/more_complex_gradle.properties", "/\\w+\\s*=\\s*(.+)/gi", null, [{},{}]]
+    ["tests/resources/simple_gradle.properties; tests/resources/more_complex_gradle.properties", "/\\w+\\s*=\\s*(.+)/gi", null, [{}, {}]],
+    ["tests/resources/more_complex_gradle.properties", "/(version)\\s*=\\s*(.+)/g; /(description)\\s*=\\s*(.+)/gi", null,
+        [{
+            "VERSION": "5.0.0-BETA-16-SNAPSHOT",
+            "DESCRIPTION": "JUnit5 Agent"
+        }]]
 ];
 
 describe("Test data extraction cases", () => {
