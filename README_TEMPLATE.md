@@ -4,11 +4,23 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-brightgreen.svg)](https://opensource.org/licenses/Apache-2.0)
 
 A GitHub action for reading, bumping, generating, formatting applications versions in release pipelines.
-Outputs three environment variables:
+Outputs three environment / output variables:
 
 - 'env.CURRENT_VERSION' - a current, extracted version of application without any changes
 - 'env.RELEASE_VERSION' - a generated release version with `SNAPSHOT` suffix removed by default
 - 'env.NEXT_VERSION' - a new version supposed to put into version source file instead of CURRENT_VERSION
+- 'env.NEXT_RELEASE_VERSION' - the same new version with `SNAPSHOT` suffix removed by default
+
+Also, there are 5 postfixes for environment variables listed above:
+
+- '_MAJOR'
+- '_MINOR'
+- '_PATCH'
+- '_PRERELEASE'
+- '_BUILDMETADATA'
+
+They contain corresponding version fragments, so for release version `5.0.3` environment / output variable
+`RELEASE_VERSION_PATCH` will contain `3`.
 
 The action uses so-called "[Semantic version](https://semver.org/)" system, please check out the
 specification first to avoid misunderstanding and misuses.
