@@ -26,6 +26,7 @@ const METADATA_DEFAULT_VARIABLE_FORMAT_PATTERNS = {
 };
 
 const REGEX_PATTERN = /^\/(.*?)\/([a-zA-Z]*)$/;
+const REGEX_DELIMITER = /;\s*/;
 
 class Properties {
     constructor() {
@@ -315,21 +316,61 @@ function toRegEx(inputStr) {
             throw new Error("Unknown error occurred parsing RegEx: " + escape(inputStr) + ": " + error.message);
         }
     }
-
     return pattern;
 }
 
+function toRegExes(inputStr) {
+    return inputStr.split(REGEX_DELIMITER).map(toRegEx);
+}
+
+function toVariableName(inputStr) {
+    if (inputStr == null) {
+        return null;
+    }
+    let result = XRegExp.replace(inputStr, /[\-\s]+/, "_", "all");
+    result = XRegExp.replace(result, /\W+/, "", "all");
+    return result.toUpperCase();
+}
+
 function extractData(properties) {
-    const patterns = properties.dataExtractPatterns.split(/;\s*/).map(toRegEx);
-    const files = properties.dataExtractPaths.split(/;\s*/).map(file => getFileContents(file));
-    files.forEach(file => {
-        file.then(buffer => {
-            const content = buffer.toString("utf-8");
-
-        });
-    });
-
-    return Promise.all(files);
+    const patterns = toRegExes(properties.dataExtractPatterns);
+    const files = properties.dataExtractPaths.split(REGEX_DELIMITER).map(file => fs.readFileSync(file, {encoding: "utf-8"}));
+    const name = toVariableName(properties.dataExtractName);
+    let index = 0;
+    return files.map(content => {
+            const variables = {};
+            for (const pattern of patterns) {
+                XRegExp.forEach(content, pattern, (match, _) => {
+                    if (name != null && name.trim().length > 0) {
+                        const idx = index++;
+                        if (idx > 0) {
+                            const numberedName = name + "_" + idx;
+                            if (match.length > 1) {
+                                variables[numberedName] = match[1];
+                            } else if (match.length === 1) {
+                                variables[numberedName] = match[0];
+                            } else {
+                                core.notice("Need at least 1 group or match to export variable");
+                            }
+                        } else {
+                            if (match.length > 1) {
+                                variables[name] = match[1];
+                            } else {
+                                variables[name] = match[0];
+                            }
+                        }
+                    } else {
+                        if (match.length < 3) {
+                            core.notice("Need at least 2 groups to export variable with extracted name");
+                        } else {
+                            variables[toVariableName(match[1])] = match[2];
+                        }
+                    }
+                });
+            }
+            return variables;
+        }
+    );
 }
 
 async function run() {
@@ -376,14 +417,15 @@ async function run() {
     if (!properties.dataExtract) {
         return;
     }
-    const extractedData = extractData(properties);
-    const variables = extractedData.keys();
-    variables.sort();
-    core.info("Got extracted data variables: " + variables.join("; "));
-    for (const key of variables) {
-        core.exportVariable(key, extractedData[key]);
-        core.setOutput(key, extractedData[key]);
-    }
+    extractData(properties).forEach(data => {
+        const variables = data.keys();
+        variables.sort();
+        core.info("Got extracted data variables: " + variables.join("; "));
+        for (const key of variables) {
+            core.exportVariable(key, data[key]);
+            core.setOutput(key, data[key]);
+        }
+    });
 }
 
 run().catch(error => {
@@ -397,5 +439,7 @@ module.exports = {
     "generateReleaseVersion": generateReleaseVersion,
     "generateMetadata": generateMetadata,
     "generateNextVersion": generateNextVersion,
-    "toRegEx": toRegEx
+    "toRegExes": toRegExes,
+    "toVariableName": toVariableName,
+    "extractData": extractData
 };

@@ -121,13 +121,15 @@ inputs:
         groups will be ignored, if it's not set, then the first group will used as variable name and the second group
         will be used as value.
       * Multiple match (multiple RegEx, 'g' flag in RegEx is set, etc) - If 'data-extract-name' value is set the action
-        will extract all RegEx matches and export the amount of variables with underscore and variable index as suffix.
-        E.G.: first_variable -> FIRST_VARIABLE_0, FIRST_VARIABLE_1, etc; If 'data-extract-name' value is not set then
+        will extract all RegEx matches and export variables with underscore and variable index as suffix, except the 
+        first one.
+        E.G.: first_variable -> FIRST_VARIABLE, FIRST_VARIABLE_1, etc; If 'data-extract-name' value is not set then
         two groups in every RegEx is a requirement, the first group will used as variable name and the second group will
-        be used as value.
+        be used as value. If multiple files have the same variable names, output values will be overwritten with the
+        latter matches. 
       
       Variable name convert rules:
-      * Spaces and symbol '-' will be converted to '_';
+      * Spaces and symbols '-', even multiple in a row, will be converted to single symbol '_';
       * Other special characters except digits and letters will be cut off;
       * The variable name will be converted to upper case.
   data-extract-name:

@@ -4,6 +4,7 @@ const each = require("jest-each").default;
 
 const index = require("../src/index");
 const {beforeAll, describe, test, expect} = require("@jest/globals");
+const XRegExp = require("xregexp");
 
 describe("Test version file read successful", () => {
     each([
@@ -306,12 +307,105 @@ describe("Test next version generation with different properties", () => {
     });
 });
 
-test("Test RegEx conversion", () => {
-    const inputs = MINIMAL_CORRECT_INPUTS;
+const REGEX = XRegExp("(?<=variable.name=).+", "i");
+const TWO_REGEXES = [REGEX, XRegExp("\"version\":\\s*\"([^\"]+)\"")];
 
-    for (const key in inputs) {
-        process.env[key] = inputs[key];
-    }
-    const result = index.toRegEx("/(?<=variable.name=).+/i");
-    const result2 = index.toRegEx("/(?<=variable.name=/+).+/dqi");
+const REGEX_STR_CASES = [
+    ["/(?<=variable.name=).+/i", [REGEX]],
+    ["/(?<=variable.name=).+/i;/\"version\":\\s*\"([^\"]+)\"/", TWO_REGEXES],
+    ["/(?<=variable.name=).+/i; /\"version\":\\s*\"([^\"]+)\"/", TWO_REGEXES],
+    ["/(?<=variable.name=).+/i;                   /\"version\":\\s*\"([^\"]+)\"/", TWO_REGEXES]
+];
+
+describe("Test RegEx string conversion", () => {
+    each(REGEX_STR_CASES).it("When RegEx inputs are '%s'", (inputs, expected) => {
+        for (const key in MINIMAL_CORRECT_INPUTS) {
+            process.env[key] = MINIMAL_CORRECT_INPUTS[key];
+        }
+
+        const result = index.toRegExes(inputs);
+        expect(result).toStrictEqual(expected);
+    });
+});
+
+const ERROR_REGEX_CASES = [
+    "/(?<=variable.name=/+).+/dqi",
+    "/(?<=variable.name=).+/i; /(?<=variable.name=/+).+/dqi",
+    "/(?<=variable.name=).+/i; /(?<=variable.name=/+).+",
+    "(?<=variable.name=/+).+/i"
+];
+
+describe("Test RegEx string conversion error", () => {
+    each(ERROR_REGEX_CASES).it("When RegEx input is '%s'", inputs => {
+        for (const key in MINIMAL_CORRECT_INPUTS) {
+            process.env[key] = MINIMAL_CORRECT_INPUTS[key];
+        }
+
+        const r = () => index.toRegExes(inputs);
+        expect(r).toThrowError("Unable to parse RegEx");
+    });
+});
+
+const VARIABLE_NAMES_CONVERSION_CASES = [
+    ["description_var", "DESCRIPTION_VAR"],
+    ["description-var", "DESCRIPTION_VAR"],
+    ["description var", "DESCRIPTION_VAR"],
+    ["description            var", "DESCRIPTION_VAR"],
+    ["description-----var", "DESCRIPTION_VAR"],
+    ["^description var$", "DESCRIPTION_VAR"],
+    ["   description    var", "_DESCRIPTION_VAR"],
+    ["   description    var    ", "_DESCRIPTION_VAR_"],
+    [null, null],
+    ["description_var_43", "DESCRIPTION_VAR_43"],
+    ["", ""]
+];
+
+describe("Test variable name string conversion", () => {
+    each(VARIABLE_NAMES_CONVERSION_CASES).it("When variable name input is '%s'", (inputs, expected) => {
+        for (const key in MINIMAL_CORRECT_INPUTS) {
+            process.env[key] = MINIMAL_CORRECT_INPUTS[key];
+        }
+
+        const result = index.toVariableName(inputs);
+        expect(result).toBe(expected);
+    });
+});
+
+const DATA_EXTRACTION_CASES = [
+    ["tests/resources/simple_gradle.properties", "/(\\w+)\\s*=\\s*(.+)/gi", null, [{
+        "VERSION": "5.0.3-SNAPSHOT",
+        "DESCRIPTION": "TestNG Agent"
+    }]],
+    ["tests/resources/simple_gradle.properties", "/\\w+\\s*=\\s*(.+)/gi", "test-name", [{
+        "TEST_NAME": "5.0.3-SNAPSHOT",
+        "TEST_NAME_1": "TestNG Agent"
+    }]],
+    ["tests/resources/simple_gradle.properties", "/(?<=version=).+/gi", "test-name", [{
+        "TEST_NAME": "5.0.3-SNAPSHOT"
+    }]],
+    ["tests/resources/simple_gradle.properties; tests/resources/more_complex_gradle.properties", "/(?<=version=).+/", "test-name", [{
+        "TEST_NAME": "5.0.3-SNAPSHOT"
+    }, {
+        "TEST_NAME_1": "5.0.0-BETA-16-SNAPSHOT"
+    }]],
+    ["tests/resources/simple_gradle.properties; tests/resources/more_complex_gradle.properties", "/\\w+\\s*=\\s*(.+)/gi", null, [{},{}]]
+];
+
+describe("Test data extraction cases", () => {
+    each(DATA_EXTRACTION_CASES).it("When file name input is '%s', pattern input is '%s', variable name is '%s'", async (files, patterns, name, expected) => {
+        for (const key in MINIMAL_CORRECT_INPUTS) {
+            process.env[key] = MINIMAL_CORRECT_INPUTS[key];
+        }
+        process.env["INPUT_DATA-EXTRACT"] = "true";
+        process.env["INPUT_DATA-EXTRACT-PATHS"] = files;
+        process.env["INPUT_DATA-EXTRACT-PATTERNS"] = patterns;
+        if (name == null) {
+            delete process.env["INPUT_DATA-EXTRACT-NAME"];
+        } else {
+            process.env["INPUT_DATA-EXTRACT-NAME"] = name;
+        }
+
+        const result = await index.extractData(new index.Properties());
+        expect(result).toEqual(expected);
+    });
 });
