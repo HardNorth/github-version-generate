@@ -7,6 +7,7 @@
 - [Issue #34](https://github.com/HardNorth/github-version-generate/issues/34) `NEXT_RELEASE_VERSION` variable export, by @HardNorth
 ### Changed
 - Minor version updated on `1.2` 
+- Some security fixes, by @dependabot
 
 ## [1.1.2]
 ### Changed
