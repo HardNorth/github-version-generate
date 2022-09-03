@@ -409,21 +409,23 @@ async function run() {
 
     // Parse and set 'CURRENT_VERSION' outputs
     const parsedVersion = Version.parseVersion(versionStr);
-    const currentVersionStr = parsedVersion.toString();
-    core.info("Got version extracted: " + currentVersionStr);
+    core.info("Got version extracted: " + parsedVersion.toString());
     exportVersion("CURRENT", parsedVersion);
 
     // Parse and set 'RELEASE_VERSION' outputs
     const releaseVersion = generateReleaseVersion(parsedVersion, properties);
-    const releaseVersionStr = releaseVersion.toString();
-    core.info("Got release version: " + releaseVersionStr);
+    core.info("Got release version: " + releaseVersion.toString());
     exportVersion("RELEASE", releaseVersion);
 
     // Parse and set 'NEXT_VERSION' outputs
     const nextVersion = generateNextVersion(parsedVersion, releaseVersion, properties);
-    const nextVersionStr = nextVersion.toString();
-    core.info("Got next version: " + nextVersionStr);
+    core.info("Got next version: " + nextVersion.toString());
     exportVersion("NEXT", nextVersion);
+
+    // Parse and set 'NEXT_RELEASE_VERSION' outputs
+    const nextReleaseVersion = generateReleaseVersion(nextVersion, properties);
+    core.info("Got next release version: " + nextReleaseVersion.toString());
+    exportVersion("NEXT_RELEASE", nextReleaseVersion);
 
     // Parse and set extracted data
     if (!properties.dataExtract) {
