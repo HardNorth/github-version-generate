@@ -91,7 +91,18 @@ jobs:
     - name: Tagging new version
       id: newVersionTag
       run: |
-        git tag -a v${{ env.RELEASE_VERSION }} -m "Release ${{ env.RELEASE_VERSION }}"
+        RELEASE_TAG="v${{ env.RELEASE_VERSION }}"
+        MINOR_TAG="v${{ env.RELEASE_VERSION_MAJOR }}.${{ env.RELEASE_VERSION_MINOR }}"
+        MAJOR_TAG="v${{ env.RELEASE_VERSION_MAJOR }}"
+
+        git tag -d "${MINOR_TAG}" || true
+        git tag -d "${MAJOR_TAG}" || true
+        git push origin ":${MINOR_TAG}" || true
+        git push origin ":${MAJOR_TAG}" || true
+
+        git tag -a "${RELEASE_TAG}" -m "Release ${{ env.RELEASE_VERSION }}"
+        git tag -a "${MINOR_TAG}" -m "Tag latest minor version"
+        git tag -a "${MAJOR_TAG}" -m "Tag latest major version"
         git push --tags
 
     - name: Read changelog Entry
