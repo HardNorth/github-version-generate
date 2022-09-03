@@ -420,7 +420,7 @@ async function run() {
     extractData(properties).forEach(data => {
         const variables = data.keys();
         variables.sort();
-        core.info("Got extracted data variables: " + variables.join("; "));
+        core.info("Got extracted data variables: " + variables.join(", "));
         for (const key of variables) {
             core.exportVariable(key, data[key]);
             core.setOutput(key, data[key]);
