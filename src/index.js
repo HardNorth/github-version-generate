@@ -7,7 +7,6 @@ const XRegExp = require("xregexp");
 const escape = require("escape-html");
 const moment = require("moment");
 const fs = require("fs");
-const util = require("util");
 
 const SEMANTIC_VERSION_REGEX =
     XRegExp("^(?P<major>0|[1-9]\\d*)\\.(?P<minor>0|[1-9]\\d*)\\.(?P<patch>0|[1-9]\\d*)(?:-(?P<prerelease>(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$");
@@ -25,10 +24,13 @@ const METADATA_DEFAULT_VARIABLE_FORMAT_PATTERNS = {
     hash: "0, 8"
 };
 
+const REGEX_PATTERN = /^\/(.*?)\/([a-zA-Z]*)$/;
+const REGEX_DELIMITER = /;\s*/;
+
 class Properties {
     constructor() {
         // Version source
-        this.versionSource = core.getInput("version-source", {required: true});
+        this.versionSource = core.getInput("version-source", {required: true, trimWhitespace: true});
         let fileRequired = false;
         if (this.versionSource === "file") {
             fileRequired = true;
@@ -38,23 +40,65 @@ class Properties {
         this.version = core.getInput("version", {required: !fileRequired});
 
         // Next version put build metadata
-        this.nextMetadata = core.getInput("next-version-put-build-metadata", {required: true}) === "true";
+        this.nextMetadata = core.getBooleanInput("next-version-put-build-metadata", {
+            required: true,
+            trimWhitespace: true
+        });
 
         // Release version
-        this.releaseCutPrerelease = core.getInput("release-version-cut-prerelease", {required: true}) === "true";
-        this.releaseCutSnapshot = core.getInput("release-version-cut-snapshot", {required: true}) === "true";
-        this.releaseCutMetadata = core.getInput("release-version-cut-build-metadata", {required: true}) === "true";
-        this.releaseGenerateMetadata = core.getInput("release-version-generate-build-metadata", {required: true}) === "true";
+        this.releaseCutPrerelease = core.getBooleanInput("release-version-cut-prerelease", {
+            required: true,
+            trimWhitespace: true
+        });
+        this.releaseCutSnapshot = core.getBooleanInput("release-version-cut-snapshot", {
+            required: true,
+            trimWhitespace: true
+        });
+        this.releaseCutMetadata = core.getBooleanInput("release-version-cut-build-metadata", {
+            required: true,
+            trimWhitespace: true
+        });
+        this.releaseGenerateMetadata = core.getBooleanInput("release-version-generate-build-metadata", {
+            required: true,
+            trimWhitespace: true
+        });
         this.releaseMetadataPattern = core.getInput("release-version-build-metadata-pattern", {required: this.releaseGenerateMetadata || this.nextMetadata});
         this.releaseMetadataTime = core.getInput("release-version-build-metadata-datetime");
 
         // Next version
-        this.nextCutPrerelease = core.getInput("next-version-cut-prerelease", {required: true}) === "true";
-        this.nextCutMetadata = core.getInput("next-version-cut-build-metadata") === "true";
-        this.nextIncrementMajor = core.getInput("next-version-increment-major", {required: true}) === "true";
-        this.nextIncrementMinor = core.getInput("next-version-increment-minor", {required: true}) === "true";
-        this.nextIncrementPatch = core.getInput("next-version-increment-patch", {required: true}) === "true";
-        this.nextIncrementPrerelease = core.getInput("next-version-increment-prerelease", {required: true}) === "true";
+        this.nextCutPrerelease = core.getBooleanInput("next-version-cut-prerelease", {
+            required: true,
+            trimWhitespace: true
+        });
+        this.nextCutMetadata = core.getBooleanInput("next-version-cut-build-metadata", {trimWhitespace: true});
+        this.nextIncrementMajor = core.getBooleanInput("next-version-increment-major", {
+            required: true,
+            trimWhitespace: true
+        });
+        this.nextIncrementMinor = core.getBooleanInput("next-version-increment-minor", {
+            required: true,
+            trimWhitespace: true
+        });
+        this.nextIncrementPatch = core.getBooleanInput("next-version-increment-patch", {
+            required: true,
+            trimWhitespace: true
+        });
+        this.nextIncrementPrerelease = core.getBooleanInput("next-version-increment-prerelease", {
+            required: true,
+            trimWhitespace: true
+        });
+
+        // Other stuff
+        this.dataExtract = core.getBooleanInput("data-extract", {trimWhitespace: true});
+        this.dataExtractName = core.getInput("data-extract-name");
+        this.dataExtractPaths = core.getInput("data-extract-paths", {
+            required: this.dataExtract,
+            trimWhitespace: true
+        });
+        this.dataExtractPatterns = core.getInput("data-extract-patterns", {
+            required: this.dataExtract,
+            trimWhitespace: true
+        });
     }
 }
 
@@ -122,26 +166,22 @@ class Version {
 }
 
 function getFileContents(file) {
-    const readPromise = util.promisify(fs.readFile);
-    return readPromise(file, {"encoding": "utf-8"});
+    return fs.readFileSync(file, {encoding: "utf-8"});
 }
 
 function getFileVersion(versionFile, extractionPattern) {
-    const fileContent = getFileContents(versionFile);
+    const content = getFileContents(versionFile);
+    const pattern = XRegExp(extractionPattern, "g");
+    const match = XRegExp.exec(content, pattern);
 
-    return fileContent.then((content) => {
-        const pattern = XRegExp(extractionPattern, ["g"]);
-        const match = XRegExp.exec(content, pattern);
-
-        if (match) {
-            if (match.length > 1) {
-                return match[1];
-            } else {
-                return match[0];
-            }
+    if (match) {
+        if (match.length > 1) {
+            return match[1];
+        } else {
+            return match[0];
         }
-        return null;
-    });
+    }
+    return null;
 }
 
 function generateMetadata(pattern, model) {
@@ -168,7 +208,7 @@ function generateMetadata(pattern, model) {
             result = moment(model["date"]).format(format.trim());
         } else {
             const formatValues = format.split(/\s*,\s*/);
-            result = model["hash"].substring(formatValues[0].trimLeft(), formatValues[1].trimRight());
+            result = model["hash"].substring(parseInt(formatValues[0].trimStart()), parseInt(formatValues[1].trimEnd()));
         }
         metadata = metadata.substring(0, variable["index"]) + result + metadata.substring(variable["index"] + variable[0].length);
     }
@@ -211,7 +251,7 @@ function generateNextVersion(currentVersion, releaseVersion, properties) {
     const nextVersion = new Version(currentVersion);
     if (!properties.nextIncrementPrerelease && !properties.nextIncrementPatch && !properties.nextIncrementMinor
         && !properties.nextIncrementMajor) {
-        if(properties.nextCutPrerelease) {
+        if (properties.nextCutPrerelease) {
             // We are going to cut prerelease, increment patch
             nextVersion.patch += 1;
         } else {
@@ -254,13 +294,107 @@ function generateNextVersion(currentVersion, releaseVersion, properties) {
     return nextVersion;
 }
 
+function toRegEx(inputStr) {
+    const patternResult = XRegExp.exec(inputStr, REGEX_PATTERN);
+    if (!patternResult) {
+        throw new Error("Unable to parse RegEx: " + escape(inputStr) + "; please the check syntax");
+    }
+    const patternStr = patternResult[1];
+    const flags = patternResult[2];
+    let pattern;
+    try {
+        pattern = XRegExp(patternStr, flags);
+    } catch (error) {
+        if (error instanceof SyntaxError) {
+            throw new Error("Unable to parse RegEx: " + escape(inputStr) + "; please the check syntax: " + error.message);
+        } else {
+            throw new Error("Unknown error occurred parsing RegEx: " + escape(inputStr) + ": " + error.message);
+        }
+    }
+    return pattern;
+}
+
+function toRegExes(inputStr) {
+    return inputStr.split(REGEX_DELIMITER).map(toRegEx);
+}
+
+function toVariableName(inputStr) {
+    if (inputStr == null) {
+        return null;
+    }
+    let result = XRegExp.replace(inputStr, /[\-\s]+/, "_", "all");
+    result = XRegExp.replace(result, /\W+/, "", "all");
+    return result.toUpperCase();
+}
+
+function extractData(properties) {
+    const patterns = toRegExes(properties.dataExtractPatterns);
+    const files = properties.dataExtractPaths.split(REGEX_DELIMITER).map(file => getFileContents(file));
+    const name = toVariableName(properties.dataExtractName);
+    let index = 0;
+    return files.map(content => {
+            const variables = {};
+            for (const pattern of patterns) {
+                XRegExp.forEach(content, pattern, (match, _) => {
+                    if (name != null && name.trim().length > 0) {
+                        const idx = index++;
+                        if (idx > 0) {
+                            const numberedName = name + "_" + idx;
+                            if (match.length > 1) {
+                                variables[numberedName] = match[1];
+                            } else if (match.length === 1) {
+                                variables[numberedName] = match[0];
+                            } else {
+                                core.notice("Need at least 1 group or match to export variable");
+                            }
+                        } else {
+                            if (match.length > 1) {
+                                variables[name] = match[1];
+                            } else {
+                                variables[name] = match[0];
+                            }
+                        }
+                    } else {
+                        if (match.length < 3) {
+                            core.notice("Need at least 2 groups to export variable with extracted name");
+                        } else {
+                            variables[toVariableName(match[1])] = match[2];
+                        }
+                    }
+                });
+            }
+            return variables;
+        }
+    );
+}
+
+function exportVersion(prefix, version) {
+    const versionStr = version.toString();
+    core.exportVariable(prefix + "_VERSION", versionStr);
+    core.setOutput(prefix + "_VERSION", versionStr);
+    core.exportVariable(prefix + "_VERSION_MAJOR", version.major);
+    core.setOutput(prefix + "_VERSION_MAJOR", version.major);
+    core.exportVariable(prefix + "_VERSION_MINOR", version.minor);
+    core.setOutput(prefix + "_VERSION_MINOR", version.minor);
+    core.exportVariable(prefix + "_VERSION_PATCH", version.patch);
+    core.setOutput(prefix + "_VERSION_PATCH", version.patch);
+    if(version.prerelease) {
+        core.exportVariable(prefix + "_VERSION_PRERELEASE", version.prerelease);
+        core.setOutput(prefix + "_VERSION_PRERELEASE", version.prerelease);
+    }
+    if(version.buildmetadata) {
+        core.exportVariable(prefix + "_VERSION_BUILDMETADATA", version.buildmetadata);
+        core.setOutput(prefix + "_VERSION_BUILDMETADATA", version.buildmetadata);
+    }
+}
+
 async function run() {
     const properties = new Properties();
 
     let versionStr;
     switch (properties.versionSource) {
         case "file":
-            versionStr = await getFileVersion(properties.versionFile, properties.versionFileExtractPattern);
+            versionStr = getFileVersion(properties.versionFile, properties.versionFileExtractPattern);
             break;
         case "variable":
             versionStr = properties.version;
@@ -275,24 +409,37 @@ async function run() {
 
     // Parse and set 'CURRENT_VERSION' outputs
     const parsedVersion = Version.parseVersion(versionStr);
-    const currentVersionStr = parsedVersion.toString();
-    core.info("Got version extracted: " + currentVersionStr);
-    core.exportVariable("CURRENT_VERSION", currentVersionStr);
-    core.setOutput("CURRENT_VERSION", currentVersionStr);
+    core.info("Got version extracted: " + parsedVersion.toString());
+    exportVersion("CURRENT", parsedVersion);
 
     // Parse and set 'RELEASE_VERSION' outputs
     const releaseVersion = generateReleaseVersion(parsedVersion, properties);
-    const releaseVersionStr = releaseVersion.toString();
-    core.info("Got release version: " + releaseVersionStr);
-    core.exportVariable("RELEASE_VERSION", releaseVersionStr);
-    core.setOutput("RELEASE_VERSION", releaseVersionStr);
+    core.info("Got release version: " + releaseVersion.toString());
+    exportVersion("RELEASE", releaseVersion);
 
     // Parse and set 'NEXT_VERSION' outputs
     const nextVersion = generateNextVersion(parsedVersion, releaseVersion, properties);
-    const nextVersionStr = nextVersion.toString();
-    core.info("Got next version: " + nextVersionStr);
-    core.exportVariable("NEXT_VERSION", nextVersionStr);
-    core.setOutput("NEXT_VERSION", nextVersionStr);
+    core.info("Got next version: " + nextVersion.toString());
+    exportVersion("NEXT", nextVersion);
+
+    // Parse and set 'NEXT_RELEASE_VERSION' outputs
+    const nextReleaseVersion = generateReleaseVersion(nextVersion, properties);
+    core.info("Got next release version: " + nextReleaseVersion.toString());
+    exportVersion("NEXT_RELEASE", nextReleaseVersion);
+
+    // Parse and set extracted data
+    if (!properties.dataExtract) {
+        return;
+    }
+    extractData(properties).forEach(data => {
+        const variables = data.keys();
+        variables.sort();
+        core.info("Got extracted data variables: " + variables.join(", "));
+        for (const key of variables) {
+            core.exportVariable(key, data[key]);
+            core.setOutput(key, data[key]);
+        }
+    });
 }
 
 run().catch(error => {
@@ -305,5 +452,8 @@ module.exports = {
     "getFileVersion": getFileVersion,
     "generateReleaseVersion": generateReleaseVersion,
     "generateMetadata": generateMetadata,
-    "generateNextVersion": generateNextVersion
+    "generateNextVersion": generateNextVersion,
+    "toRegExes": toRegExes,
+    "toVariableName": toVariableName,
+    "extractData": extractData
 };

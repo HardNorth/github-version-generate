@@ -3,6 +3,8 @@ process.env["GITHUB_SHA"] = "8278cdafa198a07b718945a97602bbffa5511f2b";
 const each = require("jest-each").default;
 
 const index = require("../src/index");
+const {beforeAll, describe, test, expect} = require("@jest/globals");
+const XRegExp = require("xregexp");
 
 describe("Test version file read successful", () => {
     each([
@@ -10,19 +12,17 @@ describe("Test version file read successful", () => {
         ["tests/resources/more_complex_gradle.properties", "(?<=version=).+", "5.0.0-BETA-16-SNAPSHOT"],
         ["tests/resources/simple_package.json", "\"version\":\\s*\"([^\"]+)\"", "1.0.0"],
         ["tests/resources/version.txt", ".+", "0.0.1-SNAPSHOT"]
-    ]).it("When version file is '%s'; patters is '%s'", async (file, pattern, expectedVersion) => {
-        const result = await index.getFileVersion(file, pattern);
+    ]).it("When version file is '%s'; patters is '%s'", (file, pattern, expectedVersion) => {
+        const result = index.getFileVersion(file, pattern);
         expect(result).toBe(expectedVersion);
     });
 });
 
-test("Test getFileVersion function throws exception on not existing file", async () => {
+test("Test getFileVersion function throws exception on not existing file", () => {
     const file = "resources/no_such_file.txt";
-    await expect(index.getFileVersion(file, "(?<=version=).+")).rejects.toMatchObject({
-        code: "ENOENT"
-    });
-});
 
+    expect(() => index.getFileVersion(file, "(?<=version=).+")).toThrowError("ENOENT: no such file or directory");
+});
 
 describe("Test version parse successful", () => {
     each([
@@ -77,7 +77,8 @@ const MINIMAL_CORRECT_INPUTS = {
     "INPUT_RELEASE-VERSION-BUILD-METADATA-PATTERN": "build.{date}.{hash}",
     "INPUT_NEXT-VERSION-CUT-PRERELEASE": "false",
     "INPUT_NEXT-VERSION-CUT-BUILD-METADATA": "true",
-    "INPUT_NEXT-VERSION-PUT-BUILD-METADATA": "false"
+    "INPUT_NEXT-VERSION-PUT-BUILD-METADATA": "false",
+    "INPUT_DATA-EXTRACT": "false"
 };
 
 test("Test correct properties input, variable version source", () => {
@@ -211,7 +212,8 @@ const RELEASE_VERSION_TEST_CASES = [
     [{"INPUT_RELEASE-VERSION-CUT-PRERELEASE": "true"}, CURRENT_VERSION, "1.2.3"],
     [{
         "INPUT_RELEASE-VERSION-CUT-PRERELEASE": "true",
-        "INPUT_RELEASE-VERSION-CUT-BUILD-METADATA": "false"}, CURRENT_VERSION, "1.2.3+build.2017-02-03.3e1f4d"]
+        "INPUT_RELEASE-VERSION-CUT-BUILD-METADATA": "false"
+    }, CURRENT_VERSION, "1.2.3+build.2017-02-03.3e1f4d"]
 ];
 
 describe("Test release version generation with different properties", () => {
@@ -239,7 +241,10 @@ PRERELEASE_INCREMENT_TEST_CASES = [
     }), "1.2.3-TESTNG7-BETA-8-SNAPSHOT+build.2017-02-03.3e1f4d"],
     [new index.Version({...CURRENT_VERSION, prerelease: "TESTNG6-RC1"}), "1.2.3-TESTNG6-RC2+build.2017-02-03.3e1f4d"],
     [new index.Version({...CURRENT_VERSION, prerelease: "TESTNG6-RC-1"}), "1.2.3-TESTNG6-RC-2+build.2017-02-03.3e1f4d"],
-    [new index.Version({...CURRENT_VERSION, prerelease: "ALPHA-SNAPSHOT"}), "1.2.3-ALPHA-SNAPSHOT+build.2017-02-03.3e1f4d"],
+    [new index.Version({
+        ...CURRENT_VERSION,
+        prerelease: "ALPHA-SNAPSHOT"
+    }), "1.2.3-ALPHA-SNAPSHOT+build.2017-02-03.3e1f4d"]
 ];
 
 describe("Test prerelease increments", () => {
@@ -284,7 +289,8 @@ const NEXT_VERSION_TEST_CASES = [
     [{"INPUT_NEXT-VERSION-CUT-PRERELEASE": "true"}, CURRENT_VERSION, RELEASE_VERSION, "1.2.4"],
     [{
         "INPUT_NEXT-VERSION-CUT-PRERELEASE": "true",
-        "INPUT_NEXT-VERSION-INCREMENT-PATCH": "true"}, CURRENT_VERSION, RELEASE_VERSION, "1.2.4"]
+        "INPUT_NEXT-VERSION-INCREMENT-PATCH": "true"
+    }, CURRENT_VERSION, RELEASE_VERSION, "1.2.4"]
 ];
 describe("Test next version generation with different properties", () => {
     each(NEXT_VERSION_TEST_CASES).it("When inputs are '%s'; and current version is: '%s'; and release version is: '%s'; expected is '%s'", (inputs, currentVersion, releaseVersion, expected) => {
@@ -297,5 +303,112 @@ describe("Test next version generation with different properties", () => {
 
         const result = index.generateNextVersion(currentVersion, releaseVersion, new index.Properties()).toString();
         expect(result).toBe(expected);
+    });
+});
+
+const REGEX = XRegExp("(?<=variable.name=).+", "i");
+const TWO_REGEXES = [REGEX, XRegExp("\"version\":\\s*\"([^\"]+)\"")];
+
+const REGEX_STR_CASES = [
+    ["/(?<=variable.name=).+/i", [REGEX]],
+    ["/(?<=variable.name=).+/i;/\"version\":\\s*\"([^\"]+)\"/", TWO_REGEXES],
+    ["/(?<=variable.name=).+/i; /\"version\":\\s*\"([^\"]+)\"/", TWO_REGEXES],
+    ["/(?<=variable.name=).+/i;                   /\"version\":\\s*\"([^\"]+)\"/", TWO_REGEXES]
+];
+
+describe("Test RegEx string conversion", () => {
+    each(REGEX_STR_CASES).it("When RegEx inputs are '%s'", (inputs, expected) => {
+        for (const key in MINIMAL_CORRECT_INPUTS) {
+            process.env[key] = MINIMAL_CORRECT_INPUTS[key];
+        }
+
+        const result = index.toRegExes(inputs);
+        expect(result).toStrictEqual(expected);
+    });
+});
+
+const ERROR_REGEX_CASES = [
+    "/(?<=variable.name=/+).+/dqi",
+    "/(?<=variable.name=).+/i; /(?<=variable.name=/+).+/dqi",
+    "/(?<=variable.name=).+/i; /(?<=variable.name=/+).+",
+    "(?<=variable.name=/+).+/i"
+];
+
+describe("Test RegEx string conversion error", () => {
+    each(ERROR_REGEX_CASES).it("When RegEx input is '%s'", inputs => {
+        for (const key in MINIMAL_CORRECT_INPUTS) {
+            process.env[key] = MINIMAL_CORRECT_INPUTS[key];
+        }
+
+        expect(() => index.toRegExes(inputs)).toThrowError("Unable to parse RegEx");
+    });
+});
+
+const VARIABLE_NAMES_CONVERSION_CASES = [
+    ["description_var", "DESCRIPTION_VAR"],
+    ["description-var", "DESCRIPTION_VAR"],
+    ["description var", "DESCRIPTION_VAR"],
+    ["description            var", "DESCRIPTION_VAR"],
+    ["description-----var", "DESCRIPTION_VAR"],
+    ["^description var$", "DESCRIPTION_VAR"],
+    ["   description    var", "_DESCRIPTION_VAR"],
+    ["   description    var    ", "_DESCRIPTION_VAR_"],
+    [null, null],
+    ["description_var_43", "DESCRIPTION_VAR_43"],
+    ["", ""]
+];
+
+describe("Test variable name string conversion", () => {
+    each(VARIABLE_NAMES_CONVERSION_CASES).it("When variable name input is '%s'", (inputs, expected) => {
+        for (const key in MINIMAL_CORRECT_INPUTS) {
+            process.env[key] = MINIMAL_CORRECT_INPUTS[key];
+        }
+
+        const result = index.toVariableName(inputs);
+        expect(result).toBe(expected);
+    });
+});
+
+const DATA_EXTRACTION_CASES = [
+    ["tests/resources/simple_gradle.properties", "/(\\w+)\\s*=\\s*(.+)/gi", null, [{
+        "VERSION": "5.0.3-SNAPSHOT",
+        "DESCRIPTION": "TestNG Agent"
+    }]],
+    ["tests/resources/simple_gradle.properties", "/\\w+\\s*=\\s*(.+)/gi", "test-name", [{
+        "TEST_NAME": "5.0.3-SNAPSHOT",
+        "TEST_NAME_1": "TestNG Agent"
+    }]],
+    ["tests/resources/simple_gradle.properties", "/(?<=version=).+/gi", "test-name", [{
+        "TEST_NAME": "5.0.3-SNAPSHOT"
+    }]],
+    ["tests/resources/simple_gradle.properties; tests/resources/more_complex_gradle.properties", "/(?<=version=).+/", "test-name", [{
+        "TEST_NAME": "5.0.3-SNAPSHOT"
+    }, {
+        "TEST_NAME_1": "5.0.0-BETA-16-SNAPSHOT"
+    }]],
+    ["tests/resources/simple_gradle.properties; tests/resources/more_complex_gradle.properties", "/\\w+\\s*=\\s*(.+)/gi", null, [{}, {}]],
+    ["tests/resources/more_complex_gradle.properties", "/(version)\\s*=\\s*(.+)/g; /(description)\\s*=\\s*(.+)/gi", null,
+        [{
+            "VERSION": "5.0.0-BETA-16-SNAPSHOT",
+            "DESCRIPTION": "JUnit5 Agent"
+        }]]
+];
+
+describe("Test data extraction cases", () => {
+    each(DATA_EXTRACTION_CASES).it("When file name input is '%s', pattern input is '%s', variable name is '%s'", async (files, patterns, name, expected) => {
+        for (const key in MINIMAL_CORRECT_INPUTS) {
+            process.env[key] = MINIMAL_CORRECT_INPUTS[key];
+        }
+        process.env["INPUT_DATA-EXTRACT"] = "true";
+        process.env["INPUT_DATA-EXTRACT-PATHS"] = files;
+        process.env["INPUT_DATA-EXTRACT-PATTERNS"] = patterns;
+        if (name == null) {
+            delete process.env["INPUT_DATA-EXTRACT-NAME"];
+        } else {
+            process.env["INPUT_DATA-EXTRACT-NAME"] = name;
+        }
+
+        const result = await index.extractData(new index.Properties());
+        expect(result).toEqual(expected);
     });
 });

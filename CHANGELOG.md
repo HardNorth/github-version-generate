@@ -1,6 +1,13 @@
 # Changelog
 
 ## [Unreleased]
+### Added
+- [Issue #24](https://github.com/HardNorth/github-version-generate/issues/24) Data extraction, by @HardNorth
+- [Issue #31](https://github.com/HardNorth/github-version-generate/issues/31) Major, Minor, Patch, Prerelease, Buildmetadata fragments export, by @HardNorth
+- [Issue #34](https://github.com/HardNorth/github-version-generate/issues/34) `NEXT_RELEASE_VERSION` variable export, by @HardNorth
+### Changed
+- Minor version updated on `1.2` 
+- Some security fixes, by @dependabot
 
 ## [1.1.2]
 ### Changed

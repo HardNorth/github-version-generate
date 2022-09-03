@@ -44,6 +44,7 @@ inputs:
     description: 'Remove build metadata suffix from source version'
     required: false
     default: 'true'
+
   # Build metadata
   release-version-generate-build-metadata:
     description: 'Put build metadata (release date, commit sha, etc.) into result RELEASE_VERSION'
@@ -65,7 +66,6 @@ inputs:
   release-version-build-metadata-datetime:
     description: 'A time stamp in ISO format to put into a build metadata string, by default the action uses current time in UTC timezone'
     required: false
-
 
   # Next version
   next-version-increment-major:
@@ -98,6 +98,51 @@ inputs:
     description: 'Put build metadata (release date, commit sha, etc.) into result NEXT_VERSION. Will be the same as for RELEASE_VERSION'
     required: false
     default: 'false'
+
+  # Other stuff
+  data-extract:
+    required: false
+    default: 'false'
+    description: |
+      Enable data extraction mechanism.
+      
+      Example:
+        data-extract: true
+        data-extract-name: 'first_variable'
+        data-extract-paths: '/path/to/file'
+        data-extract-patterns: '/(?<=variable.name=).+/i'
+      
+      There are several use cases depending on RegEx format and flags:
+      * RegEx Match only - As on example, above. Variable name in 'data-extract-name' parameter will be used 'as is', 
+        variable value will be set on matched text. Extraction will fail if 'data-extract-name' is not set.
+      * One group - Variable name in 'data-extract-name' parameter will be used 'as is', variable value will be set on 
+        group value. Extraction will fail if 'data-extract-name' is not set.
+      * Two or more groups - If 'data-extract-name' value is set then the first group will be used as value, and other
+        groups will be ignored, if it's not set, then the first group will used as variable name and the second group
+        will be used as value.
+      * Multiple match (multiple RegEx, 'g' flag in RegEx is set, etc) - If 'data-extract-name' value is set the action
+        will extract all RegEx matches and export variables with underscore and variable index as suffix, except the 
+        first one.
+        E.G.: first_variable -> FIRST_VARIABLE, FIRST_VARIABLE_1, etc; If 'data-extract-name' value is not set then
+        two groups in every RegEx is a requirement, the first group will used as variable name and the second group will
+        be used as value. If multiple files have the same variable names, output values will be overwritten with the
+        latter matches. 
+      
+      Variable name convert rules:
+      * Spaces and symbols '-', even multiple in a row, will be converted to single symbol '_';
+      * Other special characters except digits and letters will be cut off;
+      * The variable name will be converted to upper case.
+  data-extract-name:
+    required: false
+    description: |
+      Variable name to which extracted data will be placed, standard variable name conversion rules are also applied to 
+      this field. If not set it will be extracted from RegEx groups. See usage use cases above.
+  data-extract-paths:
+    required: false
+    description: 'Semicolon (";") separated path list of files which to use to extract data'
+  data-extract-patterns:
+    required: false
+    description: 'Semicolon (";") separated RegEx pattern list wrapped with "/" symbols, with flags'
 
 outputs:
   CURRENT_VERSION:
