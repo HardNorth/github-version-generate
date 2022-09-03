@@ -432,7 +432,7 @@ async function run() {
         return;
     }
     extractData(properties).forEach(data => {
-        const variables = data.keys();
+        const variables = Object.keys(data);
         variables.sort();
         core.info("Got extracted data variables: " + variables.join(", "));
         for (const key of variables) {
