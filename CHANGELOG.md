@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+### Added
+- [Issue #24](https://github.com/HardNorth/github-version-generate/issues/24) Data extraction, by @HardNorth
 
 ## [1.1.2]
 ### Changed
