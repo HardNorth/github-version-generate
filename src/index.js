@@ -368,6 +368,26 @@ function extractData(properties) {
     );
 }
 
+function exportVersion(prefix, version) {
+    const versionStr = version.toString();
+    core.exportVariable(prefix + "_VERSION", versionStr);
+    core.setOutput(prefix + "_VERSION", versionStr);
+    core.exportVariable(prefix + "_VERSION_MAJOR", version.major);
+    core.setOutput(prefix + "_VERSION_MAJOR", version.major);
+    core.exportVariable(prefix + "_VERSION_MINOR", version.minor);
+    core.setOutput(prefix + "_VERSION_MINOR", version.minor);
+    core.exportVariable(prefix + "_VERSION_PATCH", version.patch);
+    core.setOutput(prefix + "_VERSION_PATCH", version.patch);
+    if(version.prerelease) {
+        core.exportVariable(prefix + "_VERSION_PRERELEASE", version.prerelease);
+        core.setOutput(prefix + "_VERSION_PRERELEASE", version.prerelease);
+    }
+    if(version.buildmetadata) {
+        core.exportVariable(prefix + "_VERSION_BUILDMETADATA", version.buildmetadata);
+        core.setOutput(prefix + "_VERSION_BUILDMETADATA", version.buildmetadata);
+    }
+}
+
 async function run() {
     const properties = new Properties();
 
@@ -391,22 +411,19 @@ async function run() {
     const parsedVersion = Version.parseVersion(versionStr);
     const currentVersionStr = parsedVersion.toString();
     core.info("Got version extracted: " + currentVersionStr);
-    core.exportVariable("CURRENT_VERSION", currentVersionStr);
-    core.setOutput("CURRENT_VERSION", currentVersionStr);
+    exportVersion("CURRENT", parsedVersion);
 
     // Parse and set 'RELEASE_VERSION' outputs
     const releaseVersion = generateReleaseVersion(parsedVersion, properties);
     const releaseVersionStr = releaseVersion.toString();
     core.info("Got release version: " + releaseVersionStr);
-    core.exportVariable("RELEASE_VERSION", releaseVersionStr);
-    core.setOutput("RELEASE_VERSION", releaseVersionStr);
+    exportVersion("RELEASE", releaseVersion);
 
     // Parse and set 'NEXT_VERSION' outputs
     const nextVersion = generateNextVersion(parsedVersion, releaseVersion, properties);
     const nextVersionStr = nextVersion.toString();
     core.info("Got next version: " + nextVersionStr);
-    core.exportVariable("NEXT_VERSION", nextVersionStr);
-    core.setOutput("NEXT_VERSION", nextVersionStr);
+    exportVersion("NEXT", nextVersion);
 
     // Parse and set extracted data
     if (!properties.dataExtract) {
