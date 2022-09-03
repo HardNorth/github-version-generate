@@ -12,17 +12,16 @@ describe("Test version file read successful", () => {
         ["tests/resources/more_complex_gradle.properties", "(?<=version=).+", "5.0.0-BETA-16-SNAPSHOT"],
         ["tests/resources/simple_package.json", "\"version\":\\s*\"([^\"]+)\"", "1.0.0"],
         ["tests/resources/version.txt", ".+", "0.0.1-SNAPSHOT"]
-    ]).it("When version file is '%s'; patters is '%s'", async (file, pattern, expectedVersion) => {
-        const result = await index.getFileVersion(file, pattern);
+    ]).it("When version file is '%s'; patters is '%s'", (file, pattern, expectedVersion) => {
+        const result = index.getFileVersion(file, pattern);
         expect(result).toBe(expectedVersion);
     });
 });
 
-test("Test getFileVersion function throws exception on not existing file", async () => {
+test("Test getFileVersion function throws exception on not existing file", () => {
     const file = "resources/no_such_file.txt";
-    await expect(index.getFileVersion(file, "(?<=version=).+")).rejects.toMatchObject({
-        code: "ENOENT"
-    });
+
+    expect(() => index.getFileVersion(file, "(?<=version=).+")).toThrowError("ENOENT: no such file or directory");
 });
 
 describe("Test version parse successful", () => {
@@ -341,8 +340,7 @@ describe("Test RegEx string conversion error", () => {
             process.env[key] = MINIMAL_CORRECT_INPUTS[key];
         }
 
-        const r = () => index.toRegExes(inputs);
-        expect(r).toThrowError("Unable to parse RegEx");
+        expect(() => index.toRegExes(inputs)).toThrowError("Unable to parse RegEx");
     });
 });
 

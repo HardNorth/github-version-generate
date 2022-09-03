@@ -7,7 +7,6 @@ const XRegExp = require("xregexp");
 const escape = require("escape-html");
 const moment = require("moment");
 const fs = require("fs");
-const util = require("util");
 
 const SEMANTIC_VERSION_REGEX =
     XRegExp("^(?P<major>0|[1-9]\\d*)\\.(?P<minor>0|[1-9]\\d*)\\.(?P<patch>0|[1-9]\\d*)(?:-(?P<prerelease>(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$");
@@ -167,26 +166,22 @@ class Version {
 }
 
 function getFileContents(file) {
-    const readPromise = util.promisify(fs.readFile);
-    return readPromise(file);
+    return fs.readFileSync(file, {encoding: "utf-8"});
 }
 
 function getFileVersion(versionFile, extractionPattern) {
-    const fileContent = getFileContents(versionFile);
+    const content = getFileContents(versionFile);
+    const pattern = XRegExp(extractionPattern, "g");
+    const match = XRegExp.exec(content, pattern);
 
-    return fileContent.then((content) => {
-        const pattern = XRegExp(extractionPattern, "g");
-        const match = XRegExp.exec(content.toString("utf-8"), pattern);
-
-        if (match) {
-            if (match.length > 1) {
-                return match[1];
-            } else {
-                return match[0];
-            }
+    if (match) {
+        if (match.length > 1) {
+            return match[1];
+        } else {
+            return match[0];
         }
-        return null;
-    });
+    }
+    return null;
 }
 
 function generateMetadata(pattern, model) {
@@ -334,7 +329,7 @@ function toVariableName(inputStr) {
 
 function extractData(properties) {
     const patterns = toRegExes(properties.dataExtractPatterns);
-    const files = properties.dataExtractPaths.split(REGEX_DELIMITER).map(file => fs.readFileSync(file, {encoding: "utf-8"}));
+    const files = properties.dataExtractPaths.split(REGEX_DELIMITER).map(file => getFileContents(file));
     const name = toVariableName(properties.dataExtractName);
     let index = 0;
     return files.map(content => {
@@ -379,7 +374,7 @@ async function run() {
     let versionStr;
     switch (properties.versionSource) {
         case "file":
-            versionStr = await getFileVersion(properties.versionFile, properties.versionFileExtractPattern);
+            versionStr = getFileVersion(properties.versionFile, properties.versionFileExtractPattern);
             break;
         case "variable":
             versionStr = properties.version;
