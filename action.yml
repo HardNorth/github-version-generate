@@ -112,7 +112,7 @@ inputs:
         data-extract-paths: '/path/to/file'
         data-extract-patterns: '/(?<=variable.name=).+/i'
       
-      There are several different use cases depending on RegEx format and flags:
+      There are several use cases depending on RegEx format and flags:
       * RegEx Match only - As on example, above. Variable name in 'data-extract-name' parameter will be used 'as is', 
         variable value will be set on matched text. Extraction will fail if 'data-extract-name' is not set.
       * One group - Variable name in 'data-extract-name' parameter will be used 'as is', variable value will be set on 
