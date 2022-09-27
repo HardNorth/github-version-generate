@@ -17,7 +17,7 @@
 
 ## [1.1.1]
 ### Changed
-- Some inderect dependencies were updated by dependabot
+- Some indirect dependencies were updated by dependabot
 
 ## [1.1.0]
 ### Added
