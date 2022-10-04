@@ -334,7 +334,7 @@ function extractData(properties) {
     let index = 0;
     return files.map(content => {
             const variables = {};
-            for (const pattern of patterns) {
+            patterns.forEach(pattern => {
                 XRegExp.forEach(content, pattern, (match, _) => {
                     if (name != null && name.trim().length > 0) {
                         const idx = index++;
@@ -362,7 +362,7 @@ function extractData(properties) {
                         }
                     }
                 });
-            }
+            });
             return variables;
         }
     );
@@ -378,11 +378,11 @@ function exportVersion(prefix, version) {
     core.setOutput(prefix + "_VERSION_MINOR", version.minor);
     core.exportVariable(prefix + "_VERSION_PATCH", version.patch);
     core.setOutput(prefix + "_VERSION_PATCH", version.patch);
-    if(version.prerelease) {
+    if (version.prerelease) {
         core.exportVariable(prefix + "_VERSION_PRERELEASE", version.prerelease);
         core.setOutput(prefix + "_VERSION_PRERELEASE", version.prerelease);
     }
-    if(version.buildmetadata) {
+    if (version.buildmetadata) {
         core.exportVariable(prefix + "_VERSION_BUILDMETADATA", version.buildmetadata);
         core.setOutput(prefix + "_VERSION_BUILDMETADATA", version.buildmetadata);
     }
@@ -435,10 +435,10 @@ async function run() {
         const variables = Object.keys(data);
         variables.sort();
         core.info("Got extracted data variables: " + variables.join(", "));
-        for (const key of variables) {
+        variables.forEach(key => {
             core.exportVariable(key, data[key]);
             core.setOutput(key, data[key]);
-        }
+        });
     });
 }
 
