@@ -166,7 +166,7 @@ class Version {
 }
 
 function getFileContents(file) {
-    return fs.readFileSync(file, {encoding: "utf-8"});
+    return fs.readFileSync(file).toString("utf-8");
 }
 
 function getFileVersion(versionFile, extractionPattern) {
