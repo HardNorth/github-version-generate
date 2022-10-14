@@ -153,5 +153,5 @@ outputs:
     description: 'A version prepared for pushing into a repository instead of "CURRENT_VERSION" after release, usually incremented by 1'
 
 runs:
-  using: 'node12'
+  using: 'node16'
   main: 'build/index.js'

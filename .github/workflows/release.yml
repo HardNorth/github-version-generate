@@ -26,18 +26,19 @@ jobs:
 
     steps:
     # Prepare
-    - uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16
 
     - name: Setup git credentials
       run: |
         git config user.name 'Vadzim Hushchanskou'
         git config user.email 'vadzim.hushchanskou@gmail.com'
         git config user.password ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Set up Node.js
-      uses: actions/setup-node@v1
-      with:
-        node-version: 12.x
 
     - name: Generate versions
       uses: HardNorth/github-version-generate@v1.2.0
@@ -126,7 +127,7 @@ jobs:
 
     - name: Checkout develop branch
       if: ${{github.ref}} == 'main'
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         ref: 'develop'
         fetch-depth: 0
