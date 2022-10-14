@@ -26,7 +26,13 @@ jobs:
 
     steps:
     # Prepare
-    - uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16
 
     - name: Setup git credentials
       run: |
@@ -34,13 +40,8 @@ jobs:
         git config user.email 'vadzim.hushchanskou@gmail.com'
         git config user.password ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v1
-      with:
-        node-version: 12.x
-
     - name: Generate versions
-      uses: HardNorth/github-version-generate@v1.1.2
+      uses: HardNorth/github-version-generate@v1.2.0
       with:
         version-source: file
         version-file: ${{ env.VERSION_FILE }}
@@ -91,7 +92,18 @@ jobs:
     - name: Tagging new version
       id: newVersionTag
       run: |
-        git tag -a v${{ env.RELEASE_VERSION }} -m "Release ${{ env.RELEASE_VERSION }}"
+        RELEASE_TAG="v${{ env.RELEASE_VERSION }}"
+        MINOR_TAG="v${{ env.RELEASE_VERSION_MAJOR }}.${{ env.RELEASE_VERSION_MINOR }}"
+        MAJOR_TAG="v${{ env.RELEASE_VERSION_MAJOR }}"
+
+        git tag -d "${MINOR_TAG}" || true
+        git tag -d "${MAJOR_TAG}" || true
+        git push origin ":${MINOR_TAG}" || true
+        git push origin ":${MAJOR_TAG}" || true
+
+        git tag -a "${RELEASE_TAG}" -m "Release ${{ env.RELEASE_VERSION }}"
+        git tag -a "${MINOR_TAG}" -m "Tag latest minor version"
+        git tag -a "${MAJOR_TAG}" -m "Tag latest major version"
         git push --tags
 
     - name: Read changelog Entry
@@ -115,7 +127,7 @@ jobs:
 
     - name: Checkout develop branch
       if: ${{github.ref}} == 'main'
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         ref: 'develop'
         fetch-depth: 0

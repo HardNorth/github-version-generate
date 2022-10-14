@@ -1,6 +1,10 @@
 # Changelog
 
 ## [Unreleased]
+### Changed
+- NodeJS version updated on 16, by @HardNorth
+- `@actions/core` and `@actions/github` versions updated on 1.10.0 and 5.1.1 respectively, by @HardNorth
+- Minor version updated on `1.3`, by @HardNorth
 
 ## [1.2.0]
 ### Added
@@ -17,7 +21,7 @@
 
 ## [1.1.1]
 ### Changed
-- Some inderect dependencies were updated by dependabot
+- Some indirect dependencies were updated by dependabot
 
 ## [1.1.0]
 ### Added

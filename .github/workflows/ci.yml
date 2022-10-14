@@ -3,25 +3,28 @@ name: CI Build
 on:
   push:
     branches:
-    - '*'
-    - '!main'
+      - '*'
+      - '!main'
     paths-ignore:
-    - README.md
-    - CHANGELOG.md
+      - README.md
+      - CHANGELOG.md
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Node.js
-      uses: actions/setup-node@v1
-      with:
-        node-version: 12.x
-    - name: Install dependencies
-      run: npm ci
-    - name: Test with Jest
-      run: npm run test
-    - name: Build with npm
-      run: npm run build
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install dependencies
+        run: npm ci
+      - name: Test with Jest
+        run: npm run test
+      - name: Build with npm
+        run: npm run build

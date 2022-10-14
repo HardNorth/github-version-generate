@@ -3,6 +3,8 @@
 ![CI Build](https://github.com/HardNorth/github-version-generate/workflows/CI%20Build/badge.svg?branch=master)
 [![License](https://img.shields.io/badge/License-Apache%202.0-brightgreen.svg)](https://opensource.org/licenses/Apache-2.0)
 
+> Please star this repository if you like the application, it will help more people see it. Thank you!
+
 A GitHub action for reading, bumping, generating, formatting applications versions in release pipelines.
 Outputs three environment / output variables:
 
