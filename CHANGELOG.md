@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [1.3.0]
 ### Changed
 - NodeJS version updated on 16, by @HardNorth
 - `@actions/core` and `@actions/github` versions updated on 1.10.0 and 5.1.1 respectively, by @HardNorth
