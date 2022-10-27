@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --notify",
+    "lint": "eslint \"**/*.js\" --ignore-pattern node_modules/ --ignore-pattern build/",
     "build": "ncc build src/index.js -o build"
   },
   "repository": {
@@ -38,6 +39,9 @@
     "jest": "^26.6.3",
     "jest-each": "^26.6.2",
     "@jest/globals": "^26.6.2",
-    "@zeit/ncc": "0.22.3"
+    "@zeit/ncc": "0.22.3",
+    "eslint": "^8.2.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.25.2"
   }
 }
