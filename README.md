@@ -1,6 +1,6 @@
 # Version generation for GitHub Actions
 
-![CI Build](https://github.com/HardNorth/github-version-generate/workflows/CI%20Build/badge.svg?branch=master)
+[![CI Build](https://github.com/HardNorth/github-version-generate/actions/workflows/ci.yml/badge.svg)](https://github.com/HardNorth/github-version-generate/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-brightgreen.svg)](https://opensource.org/licenses/Apache-2.0)
 
 > Please star this repository if you like the application, it will help more people see it. Thank you!
@@ -67,12 +67,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
       - name: Set up JDK 1.8
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v3
         with:
-          java-version: 1.8
+          distribution: 'temurin'
+          java-version: '8'
 
       - name: Generate versions
         uses: HardNorth/github-version-generate@v1.3.0
@@ -112,7 +114,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Get version fragment to bump
         id: getVersionFragment

@@ -27,12 +27,12 @@ jobs:
     steps:
     # Prepare
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Set up Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
-        node-version: 16
+        node-version: 20
 
     - name: Setup git credentials
       run: |
@@ -41,7 +41,7 @@ jobs:
         git config user.password ${{ secrets.GITHUB_TOKEN }}
 
     - name: Generate versions
-      uses: HardNorth/github-version-generate@v1.2.0
+      uses: HardNorth/github-version-generate@v1
       with:
         version-source: file
         version-file: ${{ env.VERSION_FILE }}
@@ -52,6 +52,8 @@ jobs:
       run: npm ci
     - name: Test with Jest
       run: npm run test
+    - name: Test with ESLint
+      run: npm run lint
     - name: Build with ncc
       run: npm run build
 

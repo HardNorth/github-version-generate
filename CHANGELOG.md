@@ -1,10 +1,14 @@
 # Changelog
 
 ## [Unreleased]
+### Changed
+- Node.js version updated on 20, by @HardNorth
+- Minor version updated on `1.4`, by @HardNorth
+- Move common logic to `app.js` file to avoid running application on import, by @HardNorth
 
 ## [1.3.0]
 ### Changed
-- NodeJS version updated on 16, by @HardNorth
+- Node.js version updated on 16, by @HardNorth
 - `@actions/core` and `@actions/github` versions updated on 1.10.0 and 5.1.1 respectively, by @HardNorth
 - Minor version updated on `1.3`, by @HardNorth
 
