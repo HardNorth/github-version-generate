@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [1.4.0]
 ### Changed
 - Node.js version updated on 20, by @HardNorth
 - Minor version updated on `1.4`, by @HardNorth
