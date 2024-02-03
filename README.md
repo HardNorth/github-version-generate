@@ -1,6 +1,6 @@
 # Version generation for GitHub Actions
 
-[![CI Build](https://github.com/HardNorth/github-version-generate/actions/workflows/ci.yml/badge.svg)](https://github.com/HardNorth/github-version-generate/actions/workflows/ci.yml)
+![CI Build](https://github.com/HardNorth/github-version-generate/workflows/CI%20Build/badge.svg?branch=master)
 [![License](https://img.shields.io/badge/License-Apache%202.0-brightgreen.svg)](https://opensource.org/licenses/Apache-2.0)
 
 > Please star this repository if you like the application, it will help more people see it. Thank you!
@@ -77,7 +77,7 @@ jobs:
           java-version: '8'
 
       - name: Generate versions
-        uses: HardNorth/github-version-generate@v1.3.0
+        uses: HardNorth/github-version-generate@v1.4.0
         with:
           version-source: file
           version-file: gradle.properties
@@ -124,7 +124,7 @@ jobs:
           echo "::set-env name=VERSION_FRAGMENT::${versionFragment}"
 
       - name: Generate versions
-        uses: HardNorth/github-version-generate@v1.3.0
+        uses: HardNorth/github-version-generate@v1.4.0
         with:
           version-source: file
           version-file: ${{ env.VERSION_FILE_NAME }}
