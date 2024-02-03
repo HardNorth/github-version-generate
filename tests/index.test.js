@@ -9,7 +9,7 @@ const {
   expect,
 } = require('@jest/globals');
 const XRegExp = require('xregexp');
-const index = require('../src/index');
+const app = require('../src/app');
 
 describe('Test version file read successful', () => {
   each([
@@ -19,7 +19,7 @@ describe('Test version file read successful', () => {
     ['tests/resources/version.txt', '.+', '0.0.1-SNAPSHOT'],
   ])
     .it('When version file is \'%s\'; patters is \'%s\'', (file, pattern, expectedVersion) => {
-      const result = index.getFileVersion(file, pattern);
+      const result = app.getFileVersion(file, pattern);
       expect(result)
         .toBe(expectedVersion);
     });
@@ -28,7 +28,7 @@ describe('Test version file read successful', () => {
 test('Test getFileVersion function throws exception on not existing file', () => {
   const file = 'resources/no_such_file.txt';
 
-  expect(() => index.getFileVersion(file, '(?<=version=).+'))
+  expect(() => app.getFileVersion(file, '(?<=version=).+'))
     .toThrowError('ENOENT: no such file or directory');
 });
 
@@ -53,7 +53,7 @@ describe('Test version parse successful', () => {
     ['0.0.1-ALPHA-SNAPSHOT', 0, 0, 1, 'ALPHA-SNAPSHOT', null],
   ])
     .it('When versions is %s', (version, major, minor, patch, prerelease, buildmetadata) => {
-      const result = index.Version.parseVersion(version);
+      const result = app.Version.parseVersion(version);
       expect(result.raw)
         .toBe(version);
       expect(result.major)
@@ -89,7 +89,7 @@ describe('Test toString', () => {
     ['3.2.1', '3', '2', '1', undefined, undefined],
   ])
     .it('When version is %s', (expected, major, minor, patch, prerelease, buildmetadata) => {
-      const result = new index.Version({
+      const result = new app.Version({
         major,
         minor,
         patch,
@@ -134,7 +134,7 @@ function setEnv(inputs = {}) {
 
 test('Test correct properties input, variable version source', () => {
   setEnv();
-  expect(new index.Properties())
+  expect(new app.Properties())
     .toMatchObject({ version: '1.0.0' });
 });
 
@@ -143,7 +143,7 @@ test('Test properties fail if version-source is \'file\' and no file specified',
     'INPUT_VERSION-SOURCE': 'file',
   };
   setEnv(inputs);
-  const p = () => new index.Properties();
+  const p = () => new app.Properties();
   expect(p)
     .toThrowError('Input required and not supplied: version-file');
 });
@@ -157,7 +157,7 @@ test(
     };
     setEnv(inputs);
 
-    const p = () => new index.Properties();
+    const p = () => new app.Properties();
     expect(p)
       .toThrowError('Input required and not supplied: version-file-extraction-pattern');
   },
@@ -169,7 +169,7 @@ test('Test properties fail if version-source is \'variable\' and no \'version\' 
   };
   setEnv(inputs);
 
-  const p = () => new index.Properties();
+  const p = () => new app.Properties();
   expect(p)
     .toThrowError('Input required and not supplied: version');
 });
@@ -223,7 +223,7 @@ const METADATA_TEST_CASES = [
 describe('Test metadata generation with different patterns', () => {
   each(METADATA_TEST_CASES)
     .it('When pattern is \'%s\'', (pattern, expected, model) => {
-      const result = index.generateMetadata(pattern, model);
+      const result = app.generateMetadata(pattern, model);
       expect(result)
         .toBe(expected);
     });
@@ -235,7 +235,7 @@ const DATE = new Date(Date.now());
 const PAST_DATE = new Date(2017, 2, 4, 17, 33, 53);
 const DATE_FORMAT = new Intl.NumberFormat('en-US', { minimumIntegerDigits: 2 });
 
-const CURRENT_VERSION = new index.Version({
+const CURRENT_VERSION = new app.Version({
   input: '1.2.3-BETA-7-SNAPSHOT+build.2017-02-03.3e1f4d',
   major: '1',
   minor: '2',
@@ -244,7 +244,7 @@ const CURRENT_VERSION = new index.Version({
   buildmetadata: 'build.2017-02-03.3e1f4d',
 });
 
-const INCORRECT_SNAPSHOT_VERSION = new index.Version({
+const INCORRECT_SNAPSHOT_VERSION = new app.Version({
   input: '1.2.3-BETA-SNAPSHOT-7+build.2017-02-03.3e1f4d',
   major: '1',
   minor: '2',
@@ -309,7 +309,7 @@ describe('Test release version generation with different properties', () => {
       (inputs, currentVersion, expected) => {
         setEnv(inputs);
 
-        const result = index.generateReleaseVersion(currentVersion, new index.Properties())
+        const result = app.generateReleaseVersion(currentVersion, new app.Properties())
           .toString();
         expect(result)
           .toBe(expected);
@@ -320,27 +320,27 @@ describe('Test release version generation with different properties', () => {
 // NEXT_VERSION generation
 
 const PRERELEASE_INCREMENT_TEST_CASES = [
-  [new index.Version(CURRENT_VERSION), '1.2.3-BETA-8-SNAPSHOT+build.2017-02-03.3e1f4d'],
-  [new index.Version(INCORRECT_SNAPSHOT_VERSION), '1.2.3-BETA-SNAPSHOT-7+build.2017-02-03.3e1f4d'],
+  [new app.Version(CURRENT_VERSION), '1.2.3-BETA-8-SNAPSHOT+build.2017-02-03.3e1f4d'],
+  [new app.Version(INCORRECT_SNAPSHOT_VERSION), '1.2.3-BETA-SNAPSHOT-7+build.2017-02-03.3e1f4d'],
   [
-    new index.Version({
+    new app.Version({
       ...CURRENT_VERSION,
       prerelease: 'TESTNG7-BETA-7-SNAPSHOT',
     }), '1.2.3-TESTNG7-BETA-8-SNAPSHOT+build.2017-02-03.3e1f4d'],
   [
-    new index.Version({
+    new app.Version({
       ...CURRENT_VERSION,
       prerelease: 'TESTNG6-RC1',
     }),
     '1.2.3-TESTNG6-RC2+build.2017-02-03.3e1f4d'],
   [
-    new index.Version({
+    new app.Version({
       ...CURRENT_VERSION,
       prerelease: 'TESTNG6-RC-1',
     }),
     '1.2.3-TESTNG6-RC-2+build.2017-02-03.3e1f4d'],
   [
-    new index.Version({
+    new app.Version({
       ...CURRENT_VERSION,
       prerelease: 'ALPHA-SNAPSHOT',
     }), '1.2.3-ALPHA-SNAPSHOT+build.2017-02-03.3e1f4d'],
@@ -358,7 +358,7 @@ describe('Test prerelease increments', () => {
     });
 });
 
-const RELEASE_VERSION = new index.Version({
+const RELEASE_VERSION = new app.Version({
   input: '1.2.3-BETA-7',
   major: '1',
   minor: '2',
@@ -391,7 +391,7 @@ const NEXT_VERSION_TEST_CASES = [
     '2.0.0-BETA-1-SNAPSHOT'],
   [
     { 'INPUT_NEXT-VERSION-INCREMENT-PRERELEASE': 'true' },
-    new index.Version(
+    new app.Version(
       {
         ...CURRENT_VERSION,
         prerelease: 'SNAPSHOT',
@@ -399,7 +399,7 @@ const NEXT_VERSION_TEST_CASES = [
     ), RELEASE_VERSION, '1.2.3-SNAPSHOT'],
   [
     {},
-    new index.Version(
+    new app.Version(
       {
         ...CURRENT_VERSION,
         prerelease: 'SNAPSHOT',
@@ -424,10 +424,10 @@ describe('Test next version generation with different properties', () => {
       (inputs, currentVersion, releaseVersion, expected) => {
         setEnv(inputs);
 
-        const result = index.generateNextVersion(
+        const result = app.generateNextVersion(
           currentVersion,
           releaseVersion,
-          new index.Properties(),
+          new app.Properties(),
         )
           .toString();
         expect(result)
@@ -451,7 +451,7 @@ describe('Test RegEx string conversion', () => {
     .it('When RegEx inputs are \'%s\'', (inputs, expected) => {
       setEnv();
 
-      const result = index.toRegExes(inputs);
+      const result = app.toRegExes(inputs);
       expect(result)
         .toStrictEqual(expected);
     });
@@ -469,7 +469,7 @@ describe('Test RegEx string conversion error', () => {
     .it('When RegEx input is \'%s\'', (inputs) => {
       setEnv();
 
-      expect(() => index.toRegExes(inputs))
+      expect(() => app.toRegExes(inputs))
         .toThrowError('Unable to parse RegEx');
     });
 });
@@ -493,7 +493,7 @@ describe('Test variable name string conversion', () => {
     .it('When variable name input is \'%s\'', (inputs, expected) => {
       setEnv();
 
-      const result = index.toVariableName(inputs);
+      const result = app.toVariableName(inputs);
       expect(result)
         .toBe(expected);
     });
@@ -570,7 +570,7 @@ describe('Test data extraction cases', () => {
           process.env['INPUT_DATA-EXTRACT-NAME'] = name;
         }
 
-        const result = await index.extractData(new index.Properties());
+        const result = await app.extractData(new app.Properties());
         expect(result)
           .toEqual(expected);
       },
