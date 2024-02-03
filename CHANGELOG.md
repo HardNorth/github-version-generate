@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- NodeJS version updated on 20, by @HardNorth
 
 ## [1.3.0]
 ### Changed
