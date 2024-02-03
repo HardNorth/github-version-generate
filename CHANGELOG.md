@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 - NodeJS version updated on 20, by @HardNorth
+- Minor version updated on `1.4`, by @HardNorth
 
 ## [1.3.0]
 ### Changed
