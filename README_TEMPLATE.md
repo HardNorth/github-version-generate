@@ -6,7 +6,7 @@
 > Please star this repository if you like the application, it will help more people see it. Thank you!
 
 A GitHub action for reading, bumping, generating, formatting applications versions in release pipelines.
-Outputs three environment / output variables:
+Outputs four environment / output variables:
 
 - 'env.CURRENT_VERSION' - a current, extracted version of application without any changes
 - 'env.RELEASE_VERSION' - a generated release version with `SNAPSHOT` suffix removed by default
