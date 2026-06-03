@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Node.js version updated on 24, by @ijsvogelaar
 
 ## [1.4.0]
 ### Changed

@@ -1,12 +1,12 @@
-# Version generation for GitHub Actions
+# Version generation and bumping for GitHub Actions
 
-![CI Build](https://github.com/HardNorth/github-version-generate/workflows/CI%20Build/badge.svg?branch=master)
+[![CI Build](https://github.com/HardNorth/github-version-generate/actions/workflows/ci.yml/badge.svg)](https://github.com/HardNorth/github-version-generate/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-brightgreen.svg)](https://opensource.org/licenses/Apache-2.0)
 
 > Please star this repository if you like the application, it will help more people see it. Thank you!
 
 A GitHub action for reading, bumping, generating, formatting applications versions in release pipelines.
-Outputs three environment / output variables:
+Outputs four environment / output variables:
 
 - 'env.CURRENT_VERSION' - a current, extracted version of application without any changes
 - 'env.RELEASE_VERSION' - a generated release version with `SNAPSHOT` suffix removed by default
