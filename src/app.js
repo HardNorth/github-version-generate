@@ -5,6 +5,7 @@ const XRegExp = require('xregexp');
 const escape = require('escape-html');
 const moment = require('moment');
 const fs = require('fs');
+const path = require('path');
 
 const { context } = github;
 const SEMANTIC_VERSION_REGEX = XRegExp(
@@ -181,6 +182,9 @@ class Version {
 }
 
 function getFileContents(file) {
+  if (path.isAbsolute(file) || file.split(/[\\/]/).includes('..')) {
+    throw new Error(`Invalid file path: ${escape(file)}; path must be a relative path within the workspace directory`);
+  }
   return fs.readFileSync(file)
     .toString('utf-8');
 }
