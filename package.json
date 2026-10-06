@@ -47,5 +47,10 @@
   },
   "engines": {
     "node": "^24"
+  },
+  "overrides": {
+    "undici": {
+      "@fastify/busboy": "3.2.2"
+    }
   }
 }
